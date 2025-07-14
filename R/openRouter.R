@@ -186,7 +186,7 @@ workflow <- function(event_log, models, prompt) {
 
 # Set up OpenRouter configuration
 
-OPENROUTER_API_KEY <- "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"
+OPENROUTER_API_KEY <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 OPENROUTER_BASE_URL <- "https://openrouter.ai/api/v1"
 
 # Define the prompt to test
