@@ -373,7 +373,7 @@ def main():
     
     use_case = "Organ"
     
-    OPENROUTER_API_KEY = "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" #REPLACE BY YOUR OPEN ROUTER API KEY
+    OPENROUTER_API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
     fileName = "prompt_infection.txt"
     
     # Define the prompt
