@@ -21,6 +21,10 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 import logging
 from pathlib import Path
+import graphviz
+
+import os
+os.environ["PATH"] += ';C:\\Program Files\\Graphviz\\bin'
 
 # PM4PY imports for process mining
 import pm4py
@@ -81,15 +85,22 @@ class ProcessMiningAnalyzer:
             logger.error(f"Error loading data: {e}")
             raise
     
-    def filter_sepsis_cases(self) -> None:
+    def filter_sepsis_cases(self, sepsis: bool) -> None:
         """Filter cases based on SepsisLabel == 1"""
         try:
             # Read original CSV to get SepsisLabel
             df = pd.read_csv(self.event_log_path)
             
+            print(len(df['case'].unique()))
+                  
             # Get case IDs with SepsisLabel == 1
-            sepsis_cases = df[df['SepsisLabel'] == 1]['case'].unique()
-            
+            if sepsis:
+                sepsis_cases = df[df['SepsisLabel'] == 1]['case'].unique()
+            else:
+                selection = df[df['SepsisLabel'] == 1]['case'].unique()
+                sepsis_cases = df[~(df['case'].isin(selection))]['case'].unique()
+                
+            print(len(sepsis_cases))
             # Filter event log
             filtered_traces = []
             for trace in self.event_log:
@@ -106,7 +117,7 @@ class ProcessMiningAnalyzer:
             logger.error(f"Error filtering cases: {e}")
             raise
     
-    def generate_process_discovery(self) -> None:
+    def generate_process_discovery(self, use_case: str, proces_path: str) -> None:
         """Generate process map and matrix using PM4PY"""
         try:
             # Generate DFG (Directly-Follows Graph)
@@ -116,6 +127,9 @@ class ProcessMiningAnalyzer:
             start_activities = pm4py.get_start_activities(self.event_log)
             end_activities = pm4py.get_end_activities(self.event_log)
             
+            pm4py.view_dfg(dfg, start_activities, end_activities)
+            
+            
             # Create process map data structure
             process_map_data = {
                 'dfg': {str(k): v for k, v in dfg.items()},
@@ -124,7 +138,7 @@ class ProcessMiningAnalyzer:
             }
             
             # Save process map to JSON
-            with open('processMap.json', 'w') as f:
+            with open(proces_path, 'w') as f:
                 json.dump(process_map_data, f, indent=2)
             
             # Generate process matrix (activity frequency matrix)
@@ -227,21 +241,33 @@ def save_string_to_md(text_string: str, filename: str = "output.md", directory: 
         logger.error(f"Error saving file {filepath}: {e}")
         raise
 
-def query_model_safe(client: OpenRouterClient, model_name: str, prompt: str) -> Dict:
+def query_model_safe(client: OpenRouterClient, model_name: str, prompt: str, use_case: str) -> Dict:
     """Safely query a model with error handling"""
     try:
         logger.info(f"Querying model: {model_name}")
         
-        # Read file contents
-        matrix_content = read_file_content('process_matrix.csv')
-        map_content = read_file_content('processMap.json')
-        
-        # Prepare messages
-        messages = [
-            {"role": "user", "content": prompt},
-            {"role": "user", "content": f"Process Matrix CSV:\n{matrix_content}"},
-            {"role": "user", "content": f"Process Map JSON:\n{map_content}"}
-        ]
+        if use_case == "Infection":
+            # Read file contents
+            map_content = read_file_content('processMap.json')
+            
+            # Prepare messages
+            messages = [
+                {"role": "user", "content": prompt},
+                {"role": "user", "content": f"Process Map JSON:\n{map_content}"}
+            ]
+            
+        else:
+            # Read file contents
+            map_content_1 = read_file_content('processMap_1.json')
+            map_content_2 = read_file_content('processMap_2.json')
+            
+            # Prepare messages
+            messages = [
+                {"role": "user", "content": prompt},
+                {"role": "user", "content": f"Process Map (with Sepsis) JSON:\n{map_content_1}"},
+                {"role": "user", "content": f"Process Map (without Sepsis) JSON:\n{map_content_2}"}
+            ]
+            
         
         # Query the model
         response = client.query_model(model_name, messages)
@@ -265,23 +291,53 @@ def query_model_safe(client: OpenRouterClient, model_name: str, prompt: str) -> 
             'tokens_used': None
         }
 
-def workflow(event_log_path: str, models: List[str], prompt: str, api_key: str) -> None:
+def workflow(event_log_path: str, models: List[str], prompt: str, api_key: str, use_case: str) -> None:
     """Main workflow function"""
     try:
         logger.info("Starting model comparison...")
         logger.info(f"Testing {len(models)} models")
         
-        # Initialize process mining analyzer
-        analyzer = ProcessMiningAnalyzer(event_log_path)
+        if use_case == "Infection":
+            # Initialize process mining analyzer
+            analyzer = ProcessMiningAnalyzer(event_log_path)
+            
+            # Load and prepare data
+            analyzer.load_and_prepare_data()
+            
+            # Filter sepsis cases
+            analyzer.filter_sepsis_cases(use_case)
+            
+            # Generate process discovery
+            analyzer.generate_process_discovery(use_case, "processMap.json")
         
-        # Load and prepare data
-        analyzer.load_and_prepare_data()
+        elif use_case == "Organ":
+            
+            # Initialize process mining analyzer
+            analyzer = ProcessMiningAnalyzer(event_log_path)
+            
+            # Load and prepare data
+            analyzer.load_and_prepare_data()
+            
+            # Filter sepsis cases
+            analyzer.filter_sepsis_cases(sepsis=True)
+            
+            # Generate process discovery
+            analyzer.generate_process_discovery(use_case, "processMap_1.json")
+            
+            # Initialize process mining analyzer
+            analyzer = ProcessMiningAnalyzer(event_log_path)
+            
+            # Load and prepare data
+            analyzer.load_and_prepare_data()
+            
+            # Filter sepsis cases
+            analyzer.filter_sepsis_cases(sepsis=False)
+            
+            # Generate process discovery
+            analyzer.generate_process_discovery(use_case, "processMap_2.json")
         
-        # Filter sepsis cases
-        analyzer.filter_sepsis_cases()
-        
-        # Generate process discovery
-        analyzer.generate_process_discovery()
+        else:
+            logger.info("Unknown use case")
         
         # Initialize OpenRouter client
         client = OpenRouterClient(api_key)
@@ -289,7 +345,7 @@ def workflow(event_log_path: str, models: List[str], prompt: str, api_key: str) 
         # Query all models
         results = []
         for model in models:
-            result = query_model_safe(client, model, prompt)
+            result = query_model_safe(client, model, prompt, use_case)
             results.append(result)
         
         # Convert results to DataFrame
@@ -314,22 +370,15 @@ def workflow(event_log_path: str, models: List[str], prompt: str, api_key: str) 
 def main():
     """Main function"""
     # Configuration
-    OPENROUTER_API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
+    
+    use_case = "Organ"
+    
+    OPENROUTER_API_KEY = "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" #REPLACE BY YOUR OPEN ROUTER API KEY
+    fileName = "prompt_infection.txt"
     
     # Define the prompt
-    test_prompt = """You are an expert on process mining analyst applied to epidemiology with high skills for communicating complex data to a clinical audience in a clear, concise, and actionable manner. 
-
-Your task is to generate a comprehensive report based on the provided process mining analysis. This analysis is composed of a process matrix and a process map, attached. The target audience for this report is a group of clinical and epidemiological stakeholders working on sepsis progression modelling. The report should be written in a professional and collaborative tone, avoiding overly technical jargon where possible. The goal is to provide them with a clear understanding of the current process, identify areas for improvement, and suggest actionable recommendations to enhance patient care and operational efficiency.   The report should be structured as a Markdown (.md) file with the following sections. Remove the ```markdown at the beginning:   
-
-1. Executive Summary: Provide a high-level overview of the key findings and recommendations. This section should be concise and easily digestible for busy clinical leaders. Highlight the most important findings in sepsis progression.   
-2. Introduction: State the purpose of the report: to analyze sepsis progression using process mining to identify inefficiencies and opportunities for improvement. Briefly describe the dataset used for the analysis, including the time frame of the data and the number of cases analyzed. Sepsis progression has been modelled according to the following states: i) low risk, ii) infection, iii) cardiac damage, iv) renal damage, v) liver damage, vi) multiorgan damage and vii) sepsis. It is important to note that infection can be combined with organ damage in a specific state (eg. Cardiac damage + Infection). However, the combination of two or more organ damages leads to multiorgan damage. Last, all the transitions are irreversible (except for the low risk state).   
-3. Process Map Analysis: Provide a narrative description of the main pathway discovered in the process map, identify the most frequent activities and transitions and highlight any significant variations or loops from the expected sepsis progression. Highlight the top 3-5 most frequent activities (nodes) and explain their role in the process, detailing the most common transitions between activities and their frequencies.   
-4. Data Summary Tables: * Generate the following three tables in Markdown format: * Table 1: Case Summary * Total number of cases * Number of unique traces (variants) * Median and average case duration * Duration of the shortest and longest cases * Table 2: Activity Summary * List of all activities discovered. * Frequency of each activity (how many times it appears in the logs). * Median and average time spent in each activity. * Table 3: Trace Summary * List the top 5 most frequent process variants (traces). * For each trace, show the percentage of cases that follow it and its median duration.   
-5. Hypothesis for Sepsis Progression: This section should interpret the sepsis progression in the process map, and propose new hypothesis and research questions. In addition, it should propose recommendations and next steps for sepsis prediction in a reasonable time   
-6. Conclusion: * Summarize the main findings of the analysis. * Reiterate the key recommendations. * Suggest next steps, such as a workshop with the clinical team to discuss the findings and co-design solutions.   
-
-Please use clear headings, bullet points, and bold text to structure the report for maximum readability. Ensure that all tables are correctly formatted in Markdown.
-"""
+    with open(fileName, 'r', encoding='utf-8') as f:
+        test_prompt = f.read() 
     
     # Define models to test
     models = [
@@ -340,7 +389,7 @@ Please use clear headings, bullet points, and bold text to structure the report 
     event_log_path = "sepsisAgregated_Organ.csv"
     
     # Run workflow
-    workflow(event_log_path, models, test_prompt, OPENROUTER_API_KEY)
+    workflow(event_log_path, models, test_prompt, OPENROUTER_API_KEY, use_case)
 
 if __name__ == "__main__":
     main()

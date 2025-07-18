@@ -8,6 +8,7 @@ library(dplyr)
 library(purrr)
 library(tibble)
 library(glue)
+library(bupaR)
 
 # Function to save string to markdown file
 save_string_to_md <- function(text_string, filename = "output.md", directory = getwd()) {
@@ -75,24 +76,44 @@ query_openrouter <- function(model_name, messages, temperature = 0.7) {
 }
 
 # Function to safely query a model with error handling
-query_model_safe <- function(model_name, prompt) {
+query_model_safe <- function(model_name, prompt, use_case) {
   tryCatch({
     cat("Querying model:", model_name, "\n")
     
-    processMatrix <- 'process_matrix.csv'
-    processMap <- 'processMap.json'
+    if (use_case == "Infection") {
+      
+      processMatrix <- 'process_matrix.csv'
+
+      # Read file contents
+      matrix_content <- read_file_content(processMatrix)
+
+      # Prepare messages
+      messages <- list(
+        list(role = "user", content = prompt),
+        list(role = "user", content = paste("Process Matrix (Hours) CSV:\n", matrix_content))
+      )
+      
+    }
     
-    # Read file contents
-    matrix_content <- read_file_content(processMatrix)
-    map_content <- read_file_content(processMap)
+    else {
+      
+      processMatrix_1 <- 'process_matrix_1.csv'
+      processMatrix_2 <- 'process_matrix_2.csv'
+
+      # Read file contents
+      matrix_content_1 <- read_file_content(processMatrix_1)
+      matrix_content_2 <- read_file_content(processMatrix_2)
+      
+      # Prepare messages
+      messages <- list(
+        list(role = "user", content = prompt),
+        list(role = "user", content = paste("Process Matrix with Sepsis (Hours) CSV:\n", matrix_content_1)),
+        list(role = "user", content = paste("Process Matrix without Sepsis (Hours) CSV:\n", matrix_content_2))
+      )
+      
+    }
     
-    # Prepare messages
-    messages <- list(
-      list(role = "user", content = prompt),
-      list(role = "user", content = paste("Process Matrix CSV:\n", matrix_content)),
-      list(role = "user", content = paste("Process Map JSON:\n", map_content))
-    )
-    
+   
     # Query the model
     response <- query_openrouter(model_name, messages)
     
@@ -117,7 +138,7 @@ query_model_safe <- function(model_name, prompt) {
   })
 }
 
-workflow <- function(event_log, models, prompt) {
+workflow <- function(event_log, models, prompt, use_case) {
   
   processMatrix <- 'process_matrix.csv'
   processMap <- 'processMap.json'
@@ -128,47 +149,135 @@ workflow <- function(event_log, models, prompt) {
   
   #Process Discovery
   
-  mydata=read.csv(event_log)
-  mydata$timestamp=as.POSIXct(mydata$timestamp)
-  mydata=mydata %>%
-    eventlog(case_id="case",
-             activity_id="activity",
-             activity_instance_id="activity_instance_id",
-             lifecycle_id="lifecycle",
-             timestamp="timestamp",
-             resource_id="resource",
-             validate = TRUE)
+
+  if (use_case == "Infection"){
+    
+    mydata=read.csv(event_log)
+    mydata$timestamp=as.POSIXct(mydata$timestamp)
+    mydata=mydata %>%
+      eventlog(case_id="case",
+               activity_id="activity",
+               activity_instance_id="activity_instance_id",
+               lifecycle_id="lifecycle",
+               timestamp="timestamp",
+               resource_id="resource",
+               validate = TRUE)
+    
+    mydata = mydata %>%
+      filter_case_condition(SepsisLabel == 1)
+    
+    #Process Discovery
+    
+    case_data=cases(mydata)
+    trace_data=traces(mydata)
+    activity_data=activities(mydata)
+    
+    
+    
+    graph = mydata %>%
+      process_map(type_nodes = frequency("relative_case"), render = FALSE)
+    
+    export_map(graph, "processMap.png", "png")
+    
+    #write_json(as.character(graph), "processMap.json", pretty = FALSE)
+    
+    matrix = mydata %>% process_matrix(performance(FUN = mean, units = "hours")) 
+    
+    write.csv(matrix, file="./process_matrix.csv", row.names = FALSE)
+    
+    # Query all models
+    results <- map(models, ~query_model_safe(.x, prompt, use_case = use_case))
+    
+    # Convert results to a clean data frame
+    results_df <- map_dfr(results, ~tibble(
+      model = .x$model,
+      status = .x$status,
+      response = .x$response,
+      tokens_used = .x$tokens_used
+    ))
+    
+  }
   
-  #Filtering
+  else if (use_case == "Organ") {
+    
+    #Process Discovery With Sepsis
+    
+    mydata=read.csv(event_log)
+    mydata$timestamp=as.POSIXct(mydata$timestamp)
+    mydata=mydata %>%
+      eventlog(case_id="case",
+               activity_id="activity",
+               activity_instance_id="activity_instance_id",
+               lifecycle_id="lifecycle",
+               timestamp="timestamp",
+               resource_id="resource",
+               validate = TRUE)
+    
+    mydata = mydata %>%
+      filter_case_condition(SepsisLabel == 1)
+    
+    case_data=cases(mydata)
+    trace_data=traces(mydata)
+    activity_data=activities(mydata)
+    
+    
+    
+    graph = mydata %>%
+      process_map(type_nodes = frequency("relative_case"), render = FALSE)
+    
+    export_map(graph, "processMap_1.png", "png")
+    
+    matrix = mydata %>% process_matrix(performance(FUN = mean, units = "hours")) 
+    
+    write.csv(matrix, file="./process_matrix_1.csv", row.names = FALSE)
+    
+    #Process Discovery Without Sepsis
+    
+    mydata=read.csv(event_log)
+    mydata$timestamp=as.POSIXct(mydata$timestamp)
+    mydata=mydata %>%
+      eventlog(case_id="case",
+               activity_id="activity",
+               activity_instance_id="activity_instance_id",
+               lifecycle_id="lifecycle",
+               timestamp="timestamp",
+               resource_id="resource",
+               validate = TRUE)
+    
+    selection = (mydata %>% filter_case_condition(SepsisLabel == 1))$case %>% unique()
+    
+    mydata = mydata[!(mydata$case %in% selection),]
+    
   
-  mydata = mydata %>%
-    filter_case_condition(SepsisLabel == 1)
+    case_data=cases(mydata)
+    trace_data=traces(mydata)
+    activity_data=activities(mydata)
+    
+    graph = mydata %>%
+      process_map(type_nodes = frequency("relative_case"), render = FALSE)
+    
+    export_map(graph, "processMap_2.png", "png")
+    
+    matrix = mydata %>% process_matrix(performance(FUN = mean, units = "hours")) 
+    
+    write.csv(matrix, file="./process_matrix_2.csv", row.names = FALSE)
+    
+    # Query all models
+    results <- map(models, ~query_model_safe(.x, prompt, use_case = use_case))
+    
+    # Convert results to a clean data frame
+    results_df <- map_dfr(results, ~tibble(
+      model = .x$model,
+      status = .x$status,
+      response = .x$response,
+      tokens_used = .x$tokens_used
+    ))
+    
+  }
   
-  #Process Discovery
-  
-  case_data=cases(mydata)
-  trace_data=traces(mydata)
-  activity_data=activities(mydata)
-  
-  process_map = mydata %>%
-    process_map(type_nodes = frequency("relative_case"), render = FALSE)
-  
-  write_json(as.character(process_map), "processMap.json", pretty = FALSE)
-  
-  matrix = mydata %>% process_matrix(frequency("absolute")) 
-  
-  write.csv(matrix, file="./process_matrix.csv", row.names = FALSE)
-  
-  # Query all models
-  results <- map(models, ~query_model_safe(.x, prompt))
-  
-  # Convert results to a clean data frame
-  results_df <- map_dfr(results, ~tibble(
-    model = .x$model,
-    status = .x$status,
-    response = .x$response,
-    tokens_used = .x$tokens_used
-  ))
+  else {
+    print("Error: Case not recognized")
+  }
   
   # Save individual reports
   successful_models <- results_df %>% filter(status == "success")
@@ -186,32 +295,22 @@ workflow <- function(event_log, models, prompt) {
 
 # Set up OpenRouter configuration
 
-OPENROUTER_API_KEY <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
+use_case = "Infection"
+
+OPENROUTER_API_KEY <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
 OPENROUTER_BASE_URL <- "https://openrouter.ai/api/v1"
+fileName <- "prompt_infection.txt"
 
 # Define the prompt to test
-test_prompt <- "You are an expert on process mining analyst applied to epidemiology with high skills for communicating complex data to a clinical audience in a clear, concise, and actionable manner. 
-
-Your task is to generate a comprehensive report based on the provided process mining analysis. This analysis is composed of a process matrix and a process map, attached. The target audience for this report is a group of clinical and epidemiological stakeholders working on sepsis progression modelling. The report should be written in a professional and collaborative tone, avoiding overly technical jargon where possible. The goal is to provide them with a clear understanding of the current process, identify areas for improvement, and suggest actionable recommendations to enhance patient care and operational efficiency.   The report should be structured as a Markdown (.md) file with the following sections. Remove the ```markdown at the beginning:   
-
-1. Executive Summary: Provide a high-level overview of the key findings and recommendations. This section should be concise and easily digestible for busy clinical leaders. Highlight the most important findings in sepsis progression.   
-2. Introduction: State the purpose of the report: to analyze sepsis progression using process mining to identify inefficiencies and opportunities for improvement. Briefly describe the dataset used for the analysis, including the time frame of the data and the number of cases analyzed. Sepsis progression has been modelled according to the following states: i) low risk, ii) infection, iii) cardiac damage, iv) renal damage, v) liver damage, vi) multiorgan damage and vii) sepsis. It is important to note that infection can be combined with organ damage in a specific state (eg. Cardiac damage + Infection). However, the combination of two or more organ damages leads to multiorgan damage. Last, all the transitions are irreversible (except for the low risk state).   
-3. Process Map Analysis: Provide a narrative description of the main pathway discovered in the process map, identify the most frequent activities and transitions and highlight any significant variations or loops from the expected sepsis progression. Highlight the top 3-5 most frequent activities (nodes) and explain their role in the process, detailing the most common transitions between activities and their frequencies.   
-4. Data Summary Tables: * Generate the following three tables in Markdown format: * Table 1: Case Summary * Total number of cases * Number of unique traces (variants) * Median and average case duration * Duration of the shortest and longest cases * Table 2: Activity Summary * List of all activities discovered. * Frequency of each activity (how many times it appears in the logs). * Median and average time spent in each activity. * Table 3: Trace Summary * List the top 5 most frequent process variants (traces). * For each trace, show the percentage of cases that follow it and its median duration.   
-5. Hypothesis for Sepsis Progression: This section should interpret the sepsis progression in the process map, and propose new hypothesis and research questions. In addition, it should propose recommendations and next steps for sepsis prediction in a reasonable time   
-6. Conclusion: * Summarize the main findings of the analysis. * Reiterate the key recommendations. * Suggest next steps, such as a workshop with the clinical team to discuss the findings and co-design solutions.   
-
-Please use clear headings, bullet points, and bold text to structure the report for maximum readability. Ensure that all tables are correctly formatted in Markdown.
-
-"
+test_prompt <- readChar(fileName, file.info(fileName)$size)
 
 # Define free models to test (popular free models on OpenRouter)
 models <- c(
   "deepseek/deepseek-r1:free"
 )
 
-event_log <- "sepsisAgregated_Organ.csv"
+event_log <- "sepsisAgregated_Infection.csv"
 
-workflow(event_log, models, test_prompt)
+workflow(event_log, models, test_prompt, use_case)
 
 cat("\nScript completed!\n")
