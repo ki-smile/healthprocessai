@@ -291,26 +291,33 @@ workflow <- function(event_log, models, prompt, use_case) {
     }
   }
   
+  return(results_df)
 }
 
 # Set up OpenRouter configuration
 
-use_case = "Infection"
+use_case = "Organ"
 
-OPENROUTER_API_KEY <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
+OPENROUTER_API_KEY <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" #REPLACE BY YOUR OPEN ROUTER API KEY
 OPENROUTER_BASE_URL <- "https://openrouter.ai/api/v1"
-fileName <- "prompt_infection.txt"
+fileName <- "prompt_kidney.txt"
 
 # Define the prompt to test
 test_prompt <- readChar(fileName, file.info(fileName)$size)
 
 # Define free models to test (popular free models on OpenRouter)
 models <- c(
+  "x-ai/grok-4",
+  "openai/gpt-4.1",
+  "google/gemini-2.5-pro",
+  "anthropic/claude-sonnet-4",
   "deepseek/deepseek-r1:free"
 )
 
-event_log <- "sepsisAgregated_Infection.csv"
+#Case 1 and 2
 
-workflow(event_log, models, test_prompt, use_case)
+event_log <- "sepsisAgregated_Organ.csv"
+
+result <- workflow(event_log, models, test_prompt, use_case)
 
 cat("\nScript completed!\n")
