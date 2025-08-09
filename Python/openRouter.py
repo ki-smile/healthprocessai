@@ -380,7 +380,7 @@ def main():
     with open(fileName, 'r', encoding='utf-8') as f:
         test_prompt = f.read() 
     
-    # Define models to test
+    # Define models to test. Add non-free models
     models = [
         "deepseek/deepseek-r1:free"
     ]
