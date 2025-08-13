@@ -103,26 +103,36 @@ processed <- data %>%
 
 ---
 
-## ⚡ Performance Benchmarks
+## ⚡ Performance Considerations
 
-### Process Discovery Performance
+### Theoretical Performance Expectations
 
-| Dataset Size | Python (PM4PY) | R (bupaR) | Speed Ratio |
-|-------------|----------------|-----------|-------------|
-| 1K events | 0.2s | 0.3s | 1.5x |
-| 10K events | 1.1s | 2.4s | 2.2x |
-| 100K events | 8.5s | 21.3s | 2.5x |
-| 1M events | 76s | 240s+ | 3.2x |
-| 10M events | 720s | Memory Error | N/A |
+**Note**: The following comparisons are based on general characteristics of the underlying libraries and languages, not empirical benchmarks on this specific implementation.
 
-### Visualization Performance
+| Aspect | Python (PM4PY) | R (bupaR) | Notes |
+|--------|----------------|-----------|-------|
+| **Large Datasets** | Generally better | May struggle | Python's memory model typically handles large data more efficiently |
+| **Iterative Processing** | Efficient | Less efficient | R's copy-on-modify can impact performance |
+| **Visualization** | Good static plots | Excellent interactive | R/Shiny excels at interactive dashboards |
+| **Parallel Processing** | Good support | Good support | Both support parallelization |
 
-| Complexity | Python | R | Notes |
-|-----------|--------|---|-------|
-| Simple DFG | Fast | Fast | Both good |
-| Complex Process Map | Moderate | Slow | Python scales better |
-| Interactive | Limited | Excellent | R wins for interaction |
-| Export Quality | High | High | Both professional |
+### Memory Management Differences
+
+| Characteristic | Python | R |
+|----------------|--------|---|
+| **Memory Model** | Reference-based | Copy-on-modify |
+| **Large Data Handling** | Can process in chunks | Typically loads all data |
+| **Garbage Collection** | Automatic | Automatic but different strategy |
+
+**Important**: Actual performance will vary based on:
+- Specific use case and data characteristics
+- Hardware specifications
+- Package versions and configurations
+- Implementation details
+
+For production deployments, we recommend benchmarking with your specific datasets and workflows.
+
+**Disclaimer**: Performance comparisons in this document are based on general characteristics of the languages and libraries, not empirical testing of this specific implementation. Actual performance may vary significantly based on your use case.
 
 ---
 
@@ -1034,7 +1044,7 @@ pm4py.view_dfg(dfg, start, end)
 | Criterion | Python | R | Recommendation |
 |-----------|--------|---|----------------|
 | **Learning Curve** | ⭐⭐⭐ | ⭐⭐⭐⭐ | R easier to start |
-| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Python for speed |
+| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Depends on use case |
 | **Scalability** | ⭐⭐⭐⭐⭐ | ⭐⭐ | Python for big data |
 | **Visualization** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | R for interactivity |
 | **Statistics** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | R for analysis |
@@ -1089,8 +1099,8 @@ Recommendation: Python (PM4PY) + R (bupaR) Hybrid
 ```
 
 **Why this combination:**
-- Python handles the computational load efficiently
-- R provides superior statistical analysis and visualization
+- Python offers robust process mining libraries
+- R provides comprehensive statistical analysis and visualization
 - Both languages complement each other's strengths
 
 ### **Clinical Research Projects**
@@ -1117,9 +1127,9 @@ Recommendation: Python (PM4PY) Primary
 ```
 
 **Why Python:**
-- Superior performance for real-time processing
-- Better integration with monitoring systems
-- Robust deployment options
+- Strong ecosystem for real-time processing
+- Good integration with monitoring systems
+- Flexible deployment options
 
 ### **Quality Improvement Programs**
 ```
@@ -1250,10 +1260,10 @@ process_map(event_log, render = FALSE) # Skip rendering for analysis
 - ⚡ Working with large datasets (>100K events)
 - 🏭 Building production systems
 - 🤖 Integrating with ML/AI pipelines
-- 🚀 Need maximum performance
+- 🔧 Need specific PM4PY algorithms
 - ☁️ Deploying to cloud/containers
 - 🔍 Requiring advanced conformance checking
-- 📊 Processing real-time data streams
+- 📊 Processing streaming data
 
 ### **Choose R (bupaR) when:**
 - 📈 Focusing on statistical analysis
