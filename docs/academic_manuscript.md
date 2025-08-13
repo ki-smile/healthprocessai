@@ -783,15 +783,15 @@ All framework components, documentation, and sample datasets are available throu
 
 ## Ethics Statement
 
-This research was conducted in accordance with the Declaration of Helsinki and approved by the Karolinska Institutet Ethics Review Board (DNR: 2023/2847-31). All clinical data was de-identified according to HIPAA standards, and informed consent was obtained for prospective validation studies.
+This research was conducted in accordance with the Declaration of Helsinki using public dataset provided by Phyionet.
 
 ## Funding
 
-This work was supported by grants from the Swedish Research Council (VR-2023-04127), the Strategic Research Area in Epidemiology (SfoEpi) at Karolinska Institutet, and SMAILE (Stockholm Medical AI Lab for Enhancement).
+This work was supported by grants from the XXXXX at Karolinska Institutet and SMAILE (Stockholm Medical AI Lab for Enhancement).
 
 ## Author Contributions
 
-**E.I.F.** implemented the core process mining algorithms, conducted performance optimization, and developed the platform comparison analysis. **K.C.** designed the clinical validation studies, led the sepsis pathway analysis, and coordinated the framework validation. **F.S.** provided clinical expertise and guidance for healthcare workflow modeling and validation. **F.A.** conceived the framework, designed the AI integration architecture, and led the LLM evaluation methodology. All authors contributed to manuscript preparation, review, and approval of the final version.
+**E.I.F.** implemented the core process mining algorithms, conducted performance optimization, and developed the platform comparison analysis. **K.C.** designed the clinical validation studies, led the sepsis pathway analysis, and coordinated the framework validation. **F.S.** provided  expertise and guidance for healthcare workflow modelling and validation. **F.A.** conceived the framework, designed the AI integration architecture, and led the LLM evaluation methodology. All authors contributed to manuscript preparation, review, and approval of the final version.
 
 ## Conflicts of Interest
 
@@ -799,7 +799,7 @@ The authors declare no conflicts of interest. The research was conducted indepen
 
 ## Acknowledgments
 
-We thank the clinical teams at Karolinska University Hospital and Danderyd Hospital for their collaboration in the framework validation studies. We acknowledge the open-source communities behind PM4PY, bupaR, and OpenRouter for their foundational contributions to healthcare process mining.
+We acknowledge the open-source communities behind PM4PY, bupaR, and OpenRouter for their foundational contributions to healthcare process mining.
 
 ---
 
