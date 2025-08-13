@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-08-13T16:28:55.763498",
+  "data_path": "data/sepsisAgregated_Infection.csv",
+  "steps_completed": [
+    "data_loading",
+    "filtering",
+    "process_discovery",
+    "advanced_analytics",
+    "report_generation"
+  ],
+  "data_statistics": {
+    "num_events": 157709,
+    "num_cases": 7131,
+    "num_activities": 7,
+    "activities": [
+      "High Temperature",
+      "Normal Temperature",
+      "Infection + Normal Temperature",
+      "Infection + High Temperature",
+      "Low Temperature",
+      "Sepsis",
+      "Infection + Low Temperature"
+    ],
+    "date_range": {
+      "start": "2070-08-03T05:23:20",
+      "end": "2071-08-11T23:31:40"
+    },
+    "avg_events_per_case": 22.115972514373862,
+    "num_resources": 2,
+    "sepsis_rate": 0.16912074042911232,
+    "num_sepsis_cases": 1206.0
+  },
+  "error": "Circular reference detected"
+}

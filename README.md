@@ -21,11 +21,13 @@ HealthProcessAI provides parallel implementations in both **Python** and **R**, 
 - **Visualization**: Graphviz, Matplotlib
 - **AI Integration**: OpenRouter API
 
-### 📊 R Implementation  
+### 📊 R Implementation (NEW: Full 5-Step Pipeline)
 - **Process Mining**: bupaR ecosystem
 - **Data Handling**: tidyverse, dplyr
 - **Visualization**: processmapR, ggplot2
-- **AI Integration**: httr, OpenRouter API
+- **AI Integration**: httr2, OpenRouter API
+- **Advanced Analytics**: cluster, stats packages
+- **Report Generation**: RMarkdown (MD/HTML/PDF/Word)
 
 ## 📚 Tutorials
 
@@ -54,8 +56,7 @@ HealthProcessAI provides parallel implementations in both **Python** and **R**, 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
 #### R
-*R Colab notebook coming soon*
-<!-- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_R_Colab.ipynb) -->
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_R_Colab.ipynb)
 
 ### Option 2: Local Installation with Conda (Recommended)
 
@@ -64,19 +65,24 @@ HealthProcessAI provides parallel implementations in both **Python** and **R**, 
 git clone https://github.com/ki-smile/HealthProcessAI.git
 cd HealthProcessAI
 
-# Create conda environment
+# Create conda environment (choose one):
+# Option A: Latest compatible versions
 conda env create -f environment.yml
 conda activate healthprocessai
 
-# IMPORTANT: Run from the repository root directory
-# Run Python example (must be run from root directory)
-python examples/complete_pipeline_example.py
+# Option B: Stable fixed versions (recommended if you encounter issues)
+conda env create -f environment_stable.yml
+conda activate healthprocessai_stable
 
-# Or use the -m flag to ensure proper module resolution
+# IMPORTANT: Always run from the repository root directory
+# Use the -m flag to ensure proper module resolution (RECOMMENDED)
 python -m examples.complete_pipeline_example
 
-# Run legacy R example
-Rscript legacy_original/R/openRouter.R
+# Alternative: Run directly (may cause import errors)
+# python examples/complete_pipeline_example.py
+
+# Run modern R example (NEW: Full 5-step pipeline)
+Rscript R/examples/complete_pipeline_example.R
 ```
 
 ### Option 3: Quick Install
@@ -85,30 +91,42 @@ Rscript legacy_original/R/openRouter.R
 ```bash
 pip install -r requirements.txt
 
-# IMPORTANT: Always run from the repository root directory
-python examples/complete_pipeline_example.py
+# IMPORTANT: Always run from the repository root directory using -m flag
+python -m examples.complete_pipeline_example
 
-# Note: If you get import errors, ensure you're in the HealthProcessAI root directory
+# Note: If you get import errors, see docs/IMPORT_FIX.md for solutions
 ```
 
 #### R
 ```R
-source("requirements.R")  # Installs all R packages
-source("legacy_original/R/openRouter.R")
+# Install all required packages
+source("requirements.R")
+
+# Run the modern R implementation
+source("R/examples/complete_pipeline_example.R")
+
+# Example with custom data
+pipeline <- CompleteProcessMiningPipeline$new(
+  data_path = "data/your_data.csv",
+  api_key = Sys.getenv("OPENROUTER_API_KEY"),
+  output_dir = "./results_R"
+)
+results <- pipeline$run_complete_analysis()
 ```
 
 ## 📊 Key Features
 
 | Feature | Python | R | Notes |
 |---------|--------|---|-------|
-| **Process Discovery** | PM4PY | bupaR (Legacy) | Both support DFG, Petri nets |
-| **Data Size** | Large (64-bit) | Medium | Python better for big data |
+| **Process Discovery** | PM4PY | bupaR | Both support full process mining |
+| **Data Size** | Large (64-bit) | Medium-Large | Both handle healthcare datasets |
 | **Visualization** | Graphviz | processmapR | R has interactive options |
-| **LLM Integration** | ✅ | ✅ (Legacy) | Same OpenRouter API |
-| **Report Generation** | MD/HTML/PDF | MD/HTML (Legacy) | Python has more formats |
-| **Report Orchestration** | ✅ | ❌ | NEW: Multi-model synthesis |
-| **Performance** | Fast | Moderate | Python ~2x faster |
-| **Learning Curve** | Moderate | Easier | R more intuitive syntax |
+| **LLM Integration** | ✅ | ✅ | Same OpenRouter API, multiple models |
+| **Report Generation** | MD/HTML/PDF | MD/HTML/PDF/Word | R adds Word format |
+| **Report Orchestration** | ✅ | ✅ | NEW: Both support multi-model synthesis |
+| **Advanced Analytics** | ✅ | ✅ | Clustering, bottlenecks, predictions |
+| **Performance** | Fast | Good | Python slightly faster on large data |
+| **Learning Curve** | Moderate | Easier | R more intuitive for analysts |
 
 ## 🏥 Use Cases
 
@@ -122,15 +140,19 @@ source("legacy_original/R/openRouter.R")
 
 ```
 healthprocessai/
-├── 📂 core/           # Python core modules
-├── 📂 R/              # R implementation
-├── 📂 examples/       # Example scripts (Python)
-├── 📂 tutorials/      # Learning tutorials
-├── 📂 notebooks/      # Jupyter & Colab notebooks
-├── 📂 data/           # Sample datasets
-├── 📂 docs/           # Technical documentation
-├── 📂 tests/          # Test suites
-└── 📂 reports/        # Generated reports
+├── 📂 core/                # Python core modules (5-step pipeline)
+├── 📂 R/                   # R implementation (NEW: Full pipeline)
+│   ├── 📂 core/           # R core modules (5-step pipeline)
+│   ├── 📂 examples/       # R example scripts
+│   └── 📂 tests/          # R test suite
+├── 📂 examples/            # Python example scripts
+├── 📂 tutorials/           # Learning tutorials
+├── 📂 notebooks/           # Jupyter & Colab notebooks
+├── 📂 data/               # Sample datasets
+├── 📂 docs/               # Technical documentation
+├── 📂 tests/              # Python test suites
+├── 📂 reports/            # Generated reports
+└── 📂 legacy_original/    # Original R implementation
 ```
 
 ## 🔧 Requirements
@@ -228,25 +250,40 @@ orchestrated = orchestrator.consolidate_reports(
 )
 ```
 
-### R
+### R (NEW: Full Pipeline Implementation)
 ```r
+library(tidyverse)
 library(bupaR)
-library(httr)
+library(R6)
 
-# Load data
-event_log <- read_csv("data/sepsis_events.csv") %>%
-  eventlog(case_id = "case",
-           activity_id = "activity",
-           timestamp = "timestamp")
+# Source modern R modules
+source("R/core/step1_data_loader.R")
+source("R/core/step2_process_mining.R")
+source("R/core/step3_llm_integration.R")
+source("R/core/step4_advanced_analytics.R")
+source("R/core/step5_orchestrator.R")
+source("R/core/report_generator.R")
 
-# Discover process
-process_map(event_log)
+# Initialize pipeline
+pipeline <- CompleteProcessMiningPipeline$new(
+  data_path = "data/sepsis_events.csv",
+  api_key = Sys.getenv("OPENROUTER_API_KEY"),
+  output_dir = "./results"
+)
 
-# Generate insights
-insights <- query_openrouter(process_data, api_key)
+# Run complete analysis with all steps
+results <- pipeline$run_complete_analysis(
+  sepsis_only = TRUE,
+  use_llm = TRUE,
+  llm_models = c("anthropic", "deepseek", "google")
+)
 
-# Create report
-generate_report(insights, format = "html")
+# Results include:
+# - Process discovery with bupaR
+# - Advanced analytics (clustering, bottlenecks, KPIs)
+# - Multi-model LLM insights
+# - Orchestrated report synthesis
+# - Multiple output formats (MD, HTML, PDF, Word)
 ```
 
 ## 🤝 Contributing

@@ -1,0 +1,34 @@
+{
+  "avg_case_duration_hours": 95.82,
+  "median_case_duration_hours": 83.0,
+  "min_case_duration_hours": 0.0,
+  "max_case_duration_hours": 330.0,
+  "num_activities": 7,
+  "total_events": 43756,
+  "num_cases": 1206,
+  "avg_events_per_case": 36.28,
+  "top_5_activities": [
+    {
+      "activity": "High Temperature",
+      "count": 19806
+    },
+    {
+      "activity": "Normal Temperature",
+      "count": 16209
+    },
+    {
+      "activity": "Infection + High Temperature",
+      "count": 3003
+    },
+    {
+      "activity": "Low Temperature",
+      "count": 2175
+    },
+    {
+      "activity": "Sepsis",
+      "count": 1206
+    }
+  ],
+  "num_variants": 10,
+  "top_variant_coverage": "0.5%"
+}

@@ -1,0 +1,8 @@
+,High Temperature,Infection + High Temperature,Infection + Low Temperature,Infection + Normal Temperature,Low Temperature,Normal Temperature,Sepsis
+High Temperature,0,2167,87,480,1671,14492,909
+Infection + High Temperature,2206,0,28,110,74,542,43
+Infection + Low Temperature,87,19,0,7,104,35,2
+Infection + Normal Temperature,506,108,4,0,19,449,17
+Low Temperature,1672,61,86,24,0,300,32
+Normal Temperature,14940,471,13,409,174,0,202
+Sepsis,0,0,0,0,0,0,0

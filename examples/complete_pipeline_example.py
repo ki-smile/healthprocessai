@@ -355,6 +355,25 @@ class CompleteProcessMiningPipeline:
         self.results["report_path"] = str(report_path)
         self.results["steps_completed"].append("report_generation")
 
+    def _clean_for_json(self, obj):
+        """Clean an object for JSON serialization."""
+        if isinstance(obj, dict):
+            return {k: self._clean_for_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._clean_for_json(item) for item in obj]
+        elif isinstance(obj, (pd.Timestamp, datetime)):
+            return obj.isoformat()
+        elif isinstance(obj, (np.integer, np.floating)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, pd.DataFrame):
+            return obj.to_dict(orient='records')
+        elif isinstance(obj, pd.Series):
+            return obj.to_list()
+        else:
+            return str(obj) if not isinstance(obj, (str, int, float, bool, type(None))) else obj
+    
     def _step7_export_results(self):
         """Step 7: Export all results and artifacts."""
         logger.info("\n" + "=" * 40)
@@ -376,16 +395,39 @@ class CompleteProcessMiningPipeline:
             elif isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif isinstance(obj, pd.DataFrame):
-                return obj.to_dict()
+                # Convert DataFrame to dict with orient='records' to avoid circular references
+                return obj.to_dict(orient='records')
+            elif isinstance(obj, pd.Series):
+                return obj.to_list()
+            elif isinstance(obj, (pd.Timestamp, datetime)):
+                return obj.isoformat()
             elif hasattr(obj, "__dict__"):
-                return str(obj)
+                # Only convert to string for non-serializable objects
+                try:
+                    json.dumps(obj.__dict__)
+                    return obj.__dict__
+                except (TypeError, ValueError):
+                    return str(obj)
             return obj
 
-        # Save results
-        with open(results_path, "w") as f:
-            json.dump(self.results, f, indent=2, default=convert_for_json)
-
-        logger.info(f"✓ Pipeline results saved to {results_path}")
+        # Save results with error handling
+        try:
+            with open(results_path, "w") as f:
+                json.dump(self.results, f, indent=2, default=convert_for_json)
+            logger.info(f"✓ Pipeline results saved to {results_path}")
+        except (TypeError, ValueError) as e:
+            logger.warning(f"Could not save full results as JSON: {e}")
+            # Try saving a simplified version
+            simplified_results = {
+                "timestamp": str(self.results.get("timestamp")),
+                "data_path": str(self.results.get("data_path")),
+                "steps_completed": self.results.get("steps_completed", []),
+                "data_statistics": self._clean_for_json(self.results.get("data_statistics", {})),
+                "error": str(e)
+            }
+            with open(results_path, "w") as f:
+                json.dump(simplified_results, f, indent=2)
+            logger.info(f"✓ Simplified results saved to {results_path}")
 
         # Create visualization if possible
         try:

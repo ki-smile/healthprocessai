@@ -1,0 +1,52 @@
+{
+  "dfg": {
+    "('Infection + High Temperature', 'High Temperature')": 2206,
+    "('High Temperature', 'Infection + Normal Temperature')": 480,
+    "('Infection + Normal Temperature', 'High Temperature')": 506,
+    "('High Temperature', 'Low Temperature')": 1671,
+    "('Low Temperature', 'Normal Temperature')": 300,
+    "('Normal Temperature', 'High Temperature')": 14940,
+    "('High Temperature', 'Normal Temperature')": 14492,
+    "('Normal Temperature', 'Infection + Normal Temperature')": 409,
+    "('Infection + Normal Temperature', 'Normal Temperature')": 449,
+    "('Normal Temperature', 'Infection + High Temperature')": 471,
+    "('High Temperature', 'Infection + High Temperature')": 2167,
+    "('High Temperature', 'Sepsis')": 909,
+    "('Infection + Normal Temperature', 'Infection + High Temperature')": 108,
+    "('Infection + High Temperature', 'Infection + Normal Temperature')": 110,
+    "('Infection + High Temperature', 'Normal Temperature')": 542,
+    "('Infection + High Temperature', 'Low Temperature')": 74,
+    "('Low Temperature', 'High Temperature')": 1672,
+    "('Infection + High Temperature', 'Sepsis')": 43,
+    "('Normal Temperature', 'Sepsis')": 202,
+    "('High Temperature', 'Infection + Low Temperature')": 87,
+    "('Infection + Low Temperature', 'High Temperature')": 87,
+    "('Low Temperature', 'Sepsis')": 32,
+    "('Low Temperature', 'Infection + Low Temperature')": 86,
+    "('Infection + Low Temperature', 'Infection + High Temperature')": 19,
+    "('Low Temperature', 'Infection + High Temperature')": 61,
+    "('Normal Temperature', 'Low Temperature')": 174,
+    "('Infection + Low Temperature', 'Normal Temperature')": 35,
+    "('Infection + High Temperature', 'Infection + Low Temperature')": 28,
+    "('Infection + Low Temperature', 'Low Temperature')": 104,
+    "('Low Temperature', 'Infection + Normal Temperature')": 24,
+    "('Infection + Normal Temperature', 'Infection + Low Temperature')": 4,
+    "('Infection + Normal Temperature', 'Sepsis')": 17,
+    "('Normal Temperature', 'Infection + Low Temperature')": 13,
+    "('Infection + Normal Temperature', 'Low Temperature')": 19,
+    "('Infection + Low Temperature', 'Infection + Normal Temperature')": 7,
+    "('Infection + Low Temperature', 'Sepsis')": 2
+  },
+  "start_activities": {
+    "Infection + High Temperature": 177,
+    "High Temperature": 395,
+    "Normal Temperature": 391,
+    "Infection + Normal Temperature": 73,
+    "Low Temperature": 133,
+    "Infection + Low Temperature": 36,
+    "Sepsis": 1
+  },
+  "end_activities": {
+    "Sepsis": 1206
+  }
+}

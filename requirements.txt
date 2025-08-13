@@ -2,13 +2,13 @@
 # Process Mining Framework for Healthcare & Life Sciences
 # Developed at SMAILE, Karolinska Institutet
 
-# Core dependencies
-pandas>=2.0.0
-numpy>=1.24.0
+# Core dependencies (pinned versions for compatibility)
+pandas>=2.0.0,<2.2.0
+numpy>=1.24.0,<1.26.0
 pm4py>=2.7.0
 matplotlib>=3.6.0
 seaborn>=0.12.0
-scipy>=1.10.0
+scipy>=1.10.0,<1.12.0
 
 # Process mining and visualization
 graphviz>=0.20.0
@@ -37,8 +37,10 @@ markdown>=3.4.0
 weasyprint>=58.0  # PDF generation from HTML/Markdown
 pypdf>=3.0.0      # PDF manipulation
 
-# Optional: Advanced analytics
-scikit-learn>=1.2.0
+# Optional: Advanced analytics (pinned for compatibility)
+scikit-learn>=1.3.0,<1.4.0
+threadpoolctl>=3.1.0,<3.3.0
+joblib>=1.3.0,<1.4.0
 statsmodels>=0.13.0
 
 # Optional: Development tools

@@ -1,0 +1,77 @@
+# HealthProcessAI Stable Conda Environment
+# This environment uses specific versions known to work well together
+# Create environment: conda env create -f environment_stable.yml
+# Activate: conda activate healthprocessai_stable
+
+name: healthprocessai_stable
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python version
+  - python=3.10.13
+  
+  # Core scientific packages (stable versions)
+  - pandas=2.0.3
+  - numpy=1.24.3
+  - scipy=1.10.1
+  - matplotlib=3.7.2
+  - seaborn=0.12.2
+  
+  # Process mining
+  - pip  # PM4PY must be installed via pip
+  
+  # Visualization
+  - graphviz
+  - python-graphviz
+  - pydot=1.4.2
+  - networkx=3.1
+  
+  # Jupyter
+  - jupyter
+  - jupyterlab=3.6.5
+  - ipykernel=6.25.0
+  - notebook=6.5.4
+  - nb_conda_kernels
+  
+  # Data formats
+  - openpyxl=3.1.2
+  - xlrd=2.0.1
+  
+  # Development tools
+  - pytest=7.4.0
+  - black=23.3.0
+  - flake8=6.0.0
+  - mypy=1.4.1
+  
+  # Documentation
+  - markdown=3.4.1
+  
+  # Machine learning (stable compatible versions)
+  - scikit-learn=1.3.0
+  - threadpoolctl=3.2.0
+  - joblib=1.3.2
+  - statsmodels=0.14.0
+  
+  # Additional utilities
+  - python-dateutil=2.8.2
+  - requests=2.31.0
+  - python-dotenv=1.0.0
+  - pydantic=2.1.1
+  
+  # Pip dependencies (not available in conda)
+  - pip:
+    - pm4py==2.7.11.7
+    - weasyprint==59.0
+    - pypdf==3.15.5
+    - nbconvert==7.7.3
+    - pytest-cov==4.1.0
+    - unittest-xml-reporting==3.2.0
+
+variables:
+  HEALTHPROCESSAI_HOME: ${CONDA_PREFIX}
+  # Workaround for potential threadpool issues on macOS
+  OMP_NUM_THREADS: 1
+  MKL_NUM_THREADS: 1
+  OPENBLAS_NUM_THREADS: 1

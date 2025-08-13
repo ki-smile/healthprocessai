@@ -23,7 +23,9 @@ core_packages <- c(
   "purrr",          # Functional programming
   "readr",          # Data import
   "tibble",         # Modern data frames
-  "lubridate"       # Date/time handling
+  "lubridate",      # Date/time handling
+  "glue",           # String interpolation
+  "stringr"         # String manipulation
 )
 
 # Process mining packages
@@ -50,7 +52,8 @@ reporting_packages <- c(
   "tinytex",        # LaTeX for PDF generation
   "DT",             # Interactive tables
   "plotly",         # Interactive plots
-  "flexdashboard"   # Dashboard creation
+  "flexdashboard",  # Dashboard creation
+  "kableExtra"      # Enhanced table formatting
 )
 
 # Statistical packages
@@ -58,7 +61,8 @@ stats_packages <- c(
   "survival",       # Survival analysis
   "broom",          # Tidy statistical output
   "modelr",         # Modeling helpers
-  "caret"           # Classification and regression
+  "caret",          # Classification and regression
+  "cluster"         # Clustering algorithms
 )
 
 # Development packages
@@ -119,10 +123,22 @@ cat("Installed package versions:\n")
 cat("==========================================\n")
 
 # Key packages to check versions
-key_packages <- c("bupaR", "tidyverse", "httr", "rmarkdown")
+key_packages <- c("bupaR", "tidyverse", "httr", "httr2", "rmarkdown", "R6", "glue", "cluster")
 for(pkg in key_packages) {
   if(pkg %in% installed.packages()[,"Package"]) {
     version <- packageVersion(pkg)
     cat(sprintf("%-15s: %s\n", pkg, version))
   }
 }
+
+# Additional information
+cat("\n==========================================\n")
+cat("R Version Information:\n")
+cat("==========================================\n")
+cat(paste("R version:", R.version.string, "\n"))
+cat(paste("Platform:", R.version$platform, "\n"))
+
+cat("\n==========================================\n")
+cat("HealthProcessAI R Requirements Installation Complete!\n")
+cat("You can now run the R examples and modules.\n")
+cat("==========================================\n")
