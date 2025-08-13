@@ -31,8 +31,8 @@ Conda provides isolated environments and manages both Python and system dependen
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/smaile/healthprocessai.git
-cd healthprocessai
+git clone https://github.com/ki-smile/HealthProcessAI.git
+cd HealthProcessAI
 ```
 
 ### Step 2: Create Conda Environment
@@ -92,7 +92,7 @@ Google Colab provides free cloud-based Jupyter notebooks with GPU support.
 
 ### Option 1: Quick Start (One-Click)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/smaile/healthprocessai/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
 Click the badge above to open our pre-configured notebook.
 
@@ -116,7 +116,7 @@ print("✅ All packages installed!")
 #### Cell 2: Clone Repository
 ```python
 # Clone HealthProcessAI repository
-!git clone https://github.com/smaile/healthprocessai.git
+!git clone https://github.com/ki-smile/HealthProcessAI.git
 
 # Navigate to repository
 import os
@@ -246,15 +246,15 @@ sudo yum install graphviz
 
 ### Using Pre-built Image (Coming Soon)
 ```bash
-docker pull smaile/healthprocessai:latest
-docker run -p 8888:8888 smaile/healthprocessai
+docker pull ki-smile/healthprocessai:latest
+docker run -p 8888:8888 ki-smile/healthprocessai
 ```
 
 ### Build from Source
 ```bash
 # Clone repository
-git clone https://github.com/smaile/healthprocessai.git
-cd healthprocessai
+git clone https://github.com/ki-smile/HealthProcessAI.git
+cd HealthProcessAI
 
 # Build image
 docker build -t healthprocessai .
@@ -335,8 +335,8 @@ pytest tests/test_data_loader.py
 If you encounter issues:
 
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Search [existing issues](https://github.com/smaile/healthprocessai/issues)
-3. Create a [new issue](https://github.com/smaile/healthprocessai/issues/new) with:
+2. Search [existing issues](https://github.com/ki-smile/HealthProcessAI/issues)
+3. Create a [new issue](https://github.com/ki-smile/HealthProcessAI/issues/new) with:
    - Your environment (OS, Python version)
    - Error message
    - Steps to reproduce

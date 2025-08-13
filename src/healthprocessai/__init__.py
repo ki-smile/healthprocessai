@@ -73,7 +73,7 @@ __all__ = [
 # Package metadata
 PACKAGE_NAME = "HealthProcessAI"
 PACKAGE_DESCRIPTION = "Process Mining Framework for Healthcare & Life Sciences"
-PACKAGE_URL = "https://github.com/smaile/healthprocessai"
+PACKAGE_URL = "https://github.com/ki-smile/HealthProcessAI"
 
 
 def get_version():

@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![R](https://img.shields.io/badge/R-4.0+-blue.svg)](https://www.r-project.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/smaile/healthprocessai/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
 **Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet**
 
@@ -51,17 +51,18 @@ HealthProcessAI provides parallel implementations in both **Python** and **R**, 
 ### Option 1: Google Colab (No Installation)
 
 #### Python
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/smaile/healthprocessai/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
 #### R
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/smaile/healthprocessai/blob/main/notebooks/HealthProcessAI_R_Colab.ipynb)
+*R Colab notebook coming soon*
+<!-- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_R_Colab.ipynb) -->
 
 ### Option 2: Local Installation with Conda (Recommended)
 
 ```bash
 # Clone repository
-git clone https://github.com/smaile/healthprocessai.git
-cd healthprocessai
+git clone https://github.com/ki-smile/HealthProcessAI.git
+cd HealthProcessAI
 
 # Create conda environment
 conda env create -f environment.yml
@@ -70,8 +71,8 @@ conda activate healthprocessai
 # Run Python example
 python examples/complete_pipeline_example.py
 
-# Run R example
-Rscript R/openRouter.R
+# Run legacy R example
+Rscript legacy_original/R/openRouter.R
 ```
 
 ### Option 3: Quick Install
@@ -85,19 +86,19 @@ python examples/complete_pipeline_example.py
 #### R
 ```R
 source("requirements.R")  # Installs all R packages
-source("R/openRouter.R")
+source("legacy_original/R/openRouter.R")
 ```
 
 ## 📊 Key Features
 
 | Feature | Python | R | Notes |
 |---------|--------|---|-------|
-| **Process Discovery** | PM4PY | bupaR | Both support DFG, Petri nets |
+| **Process Discovery** | PM4PY | bupaR (Legacy) | Both support DFG, Petri nets |
 | **Data Size** | Large (64-bit) | Medium | Python better for big data |
 | **Visualization** | Graphviz | processmapR | R has interactive options |
-| **LLM Integration** | ✅ | ✅ | Same OpenRouter API |
-| **Report Generation** | MD/HTML/PDF | MD/HTML | Python has more formats |
-| **Report Orchestration** | ✅ | 🔄 | NEW: Multi-model synthesis |
+| **LLM Integration** | ✅ | ✅ (Legacy) | Same OpenRouter API |
+| **Report Generation** | MD/HTML/PDF | MD/HTML (Legacy) | Python has more formats |
+| **Report Orchestration** | ✅ | ❌ | NEW: Multi-model synthesis |
 | **Performance** | Fast | Moderate | Python ~2x faster |
 | **Learning Curve** | Moderate | Easier | R more intuitive syntax |
 
@@ -281,8 +282,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 - **Project Lead**: Farhad Abtahi
 - **Development Team**: SMAILE Lab
 - **Email**: smaile@ki.se
-- **GitHub**: [github.com/smaile/healthprocessai](https://github.com/smaile/healthprocessai)
-- **Issues**: [Report Issues](https://github.com/smaile/healthprocessai/issues)
+- **GitHub**: [github.com/ki-smile/HealthProcessAI](https://github.com/ki-smile/HealthProcessAI)
+- **Issues**: [Report Issues](https://github.com/ki-smile/HealthProcessAI/issues)
 
 ## 🔗 Citation
 
@@ -294,7 +295,7 @@ If you use HealthProcessAI in your research, please cite:
   author = {Abtahi, Farhad and Illueca Fernandez, Eduardo and Chen, Kaile},
   organization = {SMAILE Lab, Karolinska Institutet},
   year = {2024},
-  url = {https://github.com/smaile/healthprocessai}
+  url = {https://github.com/ki-smile/HealthProcessAI}
 }
 ```
 

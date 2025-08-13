@@ -15,7 +15,7 @@ This guide will have you analyzing healthcare processes with AI insights in unde
 
 **No installation required!**
 
-1. **Open our Colab notebook**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/smaile/healthprocessai/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
+1. **Open our Colab notebook**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
 2. **Run all cells** (Runtime → Run all)
 
@@ -36,8 +36,8 @@ This guide will have you analyzing healthcare processes with AI insights in unde
 
 ```bash
 # 1. Clone the repository (30 seconds)
-git clone https://github.com/smaile/healthprocessai.git
-cd healthprocessai
+git clone https://github.com/ki-smile/HealthProcessAI.git
+cd HealthProcessAI
 
 # 2. Install dependencies (2 minutes)
 pip install pm4py pandas numpy matplotlib requests
@@ -174,7 +174,7 @@ print("Data files:", os.listdir("data/"))
 
 ### Need Help?
 - 📚 Check our [Complete Tutorial](complete_tutorial.md) for detailed explanations
-- 🐞 Report issues: [GitHub Issues](https://github.com/smaile/healthprocessai/issues)
+- 🐞 Report issues: [GitHub Issues](https://github.com/ki-smile/HealthProcessAI/issues)
 - 💬 Contact: smaile@ki.se
 
 ---
