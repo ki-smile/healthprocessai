@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Report Evaluation - HealthProcessAI | SMAILE, Karolinska Institutet</title>
+    
+    <!-- Material Design 3 Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* KI Color Palette Variables - Matching main website */
+        :root {
+            /* Primary KI Colors */
+            --ki-plum: #A6249D;
+            --ki-dark-plum: #82276C;
+            --ki-fuchsia: #E4007E;
+            --ki-dark-blue: #232C65;
+            --ki-blue: #0093BD;
+            
+            /* Secondary KI Colors */
+            --ki-turquoise: #00ABBE;
+            --ki-light-blue: #41B6E6;
+            --ki-green: #95C11F;
+            --ki-yellow: #FAB919;
+            --ki-orange: #E8500E;
+            
+            /* Neutral Colors */
+            --ki-black: #000000;
+            --ki-dark-grey: #4D4D4F;
+            --ki-grey: #ACABAB;
+            --ki-light-grey: #E6E6E6;
+            --ki-background: #FAFAFA;
+            --ki-white: #FFFFFF;
+            
+            /* Material Design 3 Elevation */
+            --md-elevation-1: 0 1px 2px 0 rgba(0,0,0,0.05);
+            --md-elevation-2: 0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 6px 0 rgba(0,0,0,0.04);
+            --md-elevation-3: 0 4px 6px -2px rgba(0,0,0,0.08), 0 8px 10px 1px rgba(0,0,0,0.04);
+            --md-elevation-4: 0 6px 10px -3px rgba(0,0,0,0.10), 0 12px 18px 2px rgba(0,0,0,0.04);
+            --md-elevation-5: 0 8px 12px -4px rgba(0,0,0,0.12), 0 16px 24px 2px rgba(0,0,0,0.04);
+            
+            /* Scoring Colors */
+            --score-excellent: #95C11F;
+            --score-good: #41B6E6;
+            --score-fair: #FAB919;
+            --score-poor: #E8500E;
+        }
+        
+        /* Material Design 3 Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--ki-dark-grey);
+            background: var(--ki-background);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Typography Scale - Matching main website */
+        .display-large {
+            font-size: 57px;
+            line-height: 64px;
+            font-weight: 400;
+            letter-spacing: -0.25px;
+        }
+        
+        .headline-large {
+            font-size: 32px;
+            line-height: 40px;
+            font-weight: 400;
+        }
+        
+        .headline-medium {
+            font-size: 28px;
+            line-height: 36px;
+            font-weight: 400;
+        }
+        
+        .title-large {
+            font-size: 22px;
+            line-height: 28px;
+            font-weight: 500;
+        }
+        
+        .body-large {
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+        }
+        
+        /* Header - Matching main website */
+        header {
+            background: var(--ki-white);
+            box-shadow: var(--md-elevation-2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--ki-dark-grey);
+            font-weight: 500;
+            font-size: 20px;
+        }
+        
+        .logo-icon {
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ki-white);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+        }
+        
+        .nav-links a {
+            color: var(--ki-dark-grey);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--ki-plum);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            padding: 64px 0;
+            color: var(--ki-white);
+        }
+        
+        .hero-content h1 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .hero-content .subtitle {
+            font-size: 20px;
+            opacity: 0.95;
+            margin-bottom: 32px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 48px 0;
+        }
+        
+        /* Tabs - Material Design 3 Style */
+        .tab-container {
+            background: var(--ki-white);
+            border-radius: 16px;
+            box-shadow: var(--md-elevation-2);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+        
+        .tab-container.sticky-nav {
+            position: sticky;
+            top: 72px;
+            z-index: 50;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--ki-light-grey);
+            padding: 0 24px;
+        }
+        
+        .tab {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--ki-grey);
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab:hover {
+            color: var(--ki-dark-grey);
+            background: rgba(166, 36, 157, 0.05);
+        }
+        
+        .tab.active {
+            color: var(--ki-plum);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--ki-plum);
+        }
+        
+        /* Content Sections */
+        .content-section {
+            display: none;
+            padding: 24px;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Cards - Material Design 3 Style */
+        .card {
+            background: var(--ki-white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--md-elevation-2);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--md-elevation-3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--ki-light-grey);
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        /* Model Selector for Reports */
+        .model-selector {
+            background: var(--ki-background);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .model-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .model-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--ki-light-grey);
+            border-radius: 24px;
+            background: var(--ki-white);
+            color: var(--ki-dark-grey);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .model-btn:hover {
+            background: var(--ki-background);
+            border-color: var(--ki-plum);
+            color: var(--ki-plum);
+        }
+        
+        .model-btn.selected {
+            background: var(--ki-plum);
+            color: var(--ki-white);
+            border-color: var(--ki-plum);
+        }
+        
+        /* Model Score Cards for Comparison */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .model-card {
+            background: var(--ki-white);
+            border: 2px solid var(--ki-light-grey);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--md-elevation-3);
+        }
+        
+        .model-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .model-name {
+            font-weight: 500;
+            color: var(--ki-dark-grey);
+            margin-bottom: 8px;
+        }
+        
+        .model-score {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: var(--ki-grey);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        
+        /* Scoring Table */
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .scoring-table th,
+        .scoring-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--ki-light-grey);
+        }
+        
+        .scoring-table th {
+            background: var(--ki-background);
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        .scoring-table tr:hover {
+            background: rgba(166, 36, 157, 0.03);
+        }
+        
+        .scoring-table td:first-child {
+            text-align: left;
+        }
+        
+        /* Rubric Information Card */
+        .rubric-info {
+            background: linear-gradient(135deg, rgba(166, 36, 157, 0.05) 0%, rgba(35, 44, 101, 0.05) 100%);
+            border-left: 4px solid var(--ki-plum);
+            padding: 20px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+        
+        .rubric-info h3 {
+            color: var(--ki-dark-blue);
+            margin-bottom: 12px;
+        }
+        
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .rubric-table th,
+        .rubric-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--ki-light-grey);
+        }
+        
+        .rubric-table th {
+            background: var(--ki-light-grey);
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        .rubric-table tr:hover {
+            background: rgba(166, 36, 157, 0.03);
+        }
+        
+        /* Report Display */
+        .report-display {
+            background: var(--ki-white);
+            border-radius: 12px;
+            padding: 24px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid var(--ki-light-grey);
+        }
+        
+        .report-content {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.8;
+            color: var(--ki-dark-grey);
+        }
+        
+        .report-content h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--ki-plum);
+        }
+        
+        .report-content h2 {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+            margin: 24px 0 12px 0;
+        }
+        
+        .report-content h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--ki-dark-grey);
+            margin: 20px 0 10px 0;
+        }
+        
+        .report-content p {
+            margin: 12px 0;
+        }
+        
+        .report-content ul, .report-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        
+        .report-content li {
+            margin: 6px 0;
+        }
+        
+        .report-content strong {
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        .report-content code {
+            background: var(--ki-light-grey);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .report-content blockquote {
+            border-left: 4px solid var(--ki-plum);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--ki-grey);
+            font-style: italic;
+        }
+        
+        .report-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        .report-content th,
+        .report-content td {
+            padding: 8px;
+            border: 1px solid var(--ki-light-grey);
+            text-align: left;
+        }
+        
+        .report-content th {
+            background: var(--ki-light-grey);
+            font-weight: 500;
+        }
+        
+        /* Process Map Display */
+        .process-map-section {
+            background: linear-gradient(135deg, rgba(166, 36, 157, 0.03) 0%, rgba(35, 44, 101, 0.03) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .process-map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .process-map-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        .process-map-container {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        .process-map-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: var(--md-elevation-2);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .process-map-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .case-description {
+            background: var(--ki-white);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        
+        .case-description h4 {
+            color: var(--ki-dark-blue);
+            margin-bottom: 8px;
+        }
+        
+        /* Scoring Section */
+        .score-category {
+            background: var(--ki-white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--ki-plum);
+            box-shadow: var(--md-elevation-1);
+        }
+        
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .score-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+        }
+        
+        .score-value {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--ki-background);
+        }
+        
+        .score-excellent { color: var(--score-excellent); }
+        .score-good { color: var(--score-good); }
+        .score-fair { color: var(--score-fair); }
+        .score-poor { color: var(--score-poor); }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--ki-light-grey);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            transition: width 0.5s ease;
+        }
+        
+        /* Charts Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 24px 0;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 24px 0;
+        }
+        
+        /* Buttons - Material Design 3 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            color: var(--ki-white);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--md-elevation-3);
+        }
+        
+        .btn-secondary {
+            background: var(--ki-white);
+            color: var(--ki-dark-blue);
+            border: 2px solid var(--ki-dark-blue);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--ki-dark-blue);
+            color: var(--ki-white);
+        }
+        
+        /* Filter Controls */
+        .filter-controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        select {
+            padding: 8px 16px;
+            border: 1px solid var(--ki-light-grey);
+            border-radius: 8px;
+            background: var(--ki-white);
+            font-size: 16px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:hover {
+            border-color: var(--ki-plum);
+        }
+        
+        /* Expert Upload Section */
+        .upload-area {
+            border: 2px dashed var(--ki-plum);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--ki-background);
+        }
+        
+        .upload-area:hover {
+            background: rgba(166, 36, 157, 0.05);
+            border-color: var(--ki-dark-blue);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--ki-plum);
+            margin-bottom: 16px;
+        }
+        
+        
+        /* Footer */
+        footer {
+            background: var(--ki-dark-blue);
+            color: var(--ki-white);
+            padding: 32px 0;
+            margin-top: 64px;
+        }
+        
+        .footer-content {
+            text-align: center;
+        }
+        
+        .footer-content a {
+            color: var(--ki-white);
+            text-decoration: none;
+        }
+        
+        .footer-content a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .display-large {
+                font-size: 40px;
+                line-height: 48px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+            }
+            
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-container.sticky-nav {
+                position: static;
+                top: auto;
+            }
+            
+            .rubric-table {
+                font-size: 12px;
+            }
+            
+            .rubric-table th,
+            .rubric-table td {
+                padding: 6px;
+            }
+        }
+        
+        /* Model Name Highlighting in Orchestrated Reports */
+        .model-anthropic {
+            background: linear-gradient(135deg, rgba(166, 36, 157, 0.15), rgba(166, 36, 157, 0.08));
+            color: var(--ki-plum);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .model-deepseek {
+            background: linear-gradient(135deg, rgba(35, 44, 101, 0.15), rgba(35, 44, 101, 0.08));
+            color: var(--ki-dark-blue);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .model-google {
+            background: linear-gradient(135deg, rgba(149, 193, 31, 0.15), rgba(149, 193, 31, 0.08));
+            color: #5a7413;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .model-openai {
+            background: linear-gradient(135deg, rgba(65, 182, 230, 0.15), rgba(65, 182, 230, 0.08));
+            color: #0073a6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .model-grok {
+            background: linear-gradient(135deg, rgba(250, 185, 25, 0.15), rgba(250, 185, 25, 0.08));
+            color: #b37d00;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        /* Model icons */
+        .model-icon {
+            font-size: 14px;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+        
+        /* Enhanced tables in reports */
+        .orchestrated-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: var(--md-elevation-1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .orchestrated-table th {
+            background: linear-gradient(135deg, rgba(166, 36, 157, 0.08), rgba(35, 44, 101, 0.08));
+            color: var(--ki-dark-blue);
+            padding: 12px;
+            text-align: left;
+            font-weight: 500;
+            border-bottom: 2px solid var(--ki-light-grey);
+        }
+        
+        .orchestrated-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--ki-light-grey);
+        }
+        
+        .orchestrated-table tr:hover {
+            background: rgba(166, 36, 157, 0.03);
+        }
+        
+        .consensus-badge {
+            background: var(--ki-green);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .disagreement-badge {
+            background: var(--ki-orange);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <span class="material-icons-round">biotech</span>
+                </div>
+                <span>HealthProcessAI</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="index.html#pipeline">Pipeline</a></li>
+                <li><a href="index.html#tutorials">Tutorials</a></li>
+                <li><a href="https://github.com/smaile/healthprocessai" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="display-large">
+                <span class="material-icons-round" style="font-size: 64px;">assessment</span>
+                LLM Report Evaluation
+            </h1>
+            <p class="subtitle">Comparative Analysis and Scoring of Process Mining Reports Generated by Different Language Models</p>
+            <p style="opacity: 0.9;">Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Single Navigation/Tab Container -->
+            <div class="tab-container sticky-nav">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('reports')">
+                        <span class="material-icons-round">description</span>
+                        Reports
+                    </button>
+                    <button class="tab" onclick="switchTab('orchestrated')">
+                        <span class="material-icons-round">hub</span>
+                        Orchestrated Reports
+                    </button>
+                    <button class="tab" onclick="switchTab('ai_evaluation')">
+                        <span class="material-icons-round">smart_toy</span>
+                        AI Evaluation
+                    </button>
+                    <button class="tab" onclick="switchTab('expert_evaluation')">
+                        <span class="material-icons-round">person_search</span>
+                        Expert Evaluation
+                    </button>
+                    <button class="tab" onclick="switchTab('prompts')">
+                        <span class="material-icons-round">code</span>
+                        Prompts
+                    </button>
+                    <button class="tab" onclick="switchTab('rubric')">
+                        <span class="material-icons-round">rule</span>
+                        Evaluation Rubric
+                    </button>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports" class="content-section active">
+                    <!-- Case Selector -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label>Select Case Study:</label>
+                            <select id="caseSelect" onchange="loadReports()">
+                                <option value="case1">Case I - Infection Progression</option>
+                                <option value="case2">Case II - Organ Damage</option>
+                                <option value="case3">Case III - Glomerular Filtration Rate</option>
+                                <option value="case4">Case IV - Kidney Disease Progression</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Process Map Section -->
+                    <div class="process-map-section">
+                        <div class="process-map-header">
+                            <div class="process-map-title">Process Map Visualization</div>
+                        </div>
+                        <div class="process-map-container">
+                            <img id="processMapImage" class="process-map-image" src="" alt="Process Map" onclick="openImageFullscreen(this)">
+                        </div>
+                        <div class="case-description">
+                            <h4 id="caseTitle">Case Description</h4>
+                            <p id="caseDescription"></p>
+                        </div>
+                    </div>
+
+                    <!-- Model Selector for Reports -->
+                    <div class="model-selector">
+                        <label style="font-weight: 500; color: var(--ki-dark-grey); margin-right: 12px;">Select Model:</label>
+                        <div class="model-buttons">
+                            <button class="model-btn selected" onclick="selectModel('anthropic')">Anthropic Claude</button>
+                            <button class="model-btn" onclick="selectModel('deepseek')">DeepSeek R1</button>
+                            <button class="model-btn" onclick="selectModel('google')">Google Gemini</button>
+                            <button class="model-btn" onclick="selectModel('openai')">OpenAI GPT-4</button>
+                            <button class="model-btn" onclick="selectModel('xai')">Grok 4</button>
+                        </div>
+                    </div>
+
+                    <!-- Report Display -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Report Content</div>
+                        </div>
+                        <div class="report-display">
+                            <div class="report-content" id="reportContent">
+                                Select a case and model to view the generated report...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Evaluation Section -->
+                <div id="ai_evaluation" class="content-section">
+                    <!-- AI-based Evaluation Results -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h3 class="headline-medium">AI Evaluation Results</h3>
+                        <p class="body-large">Automated evaluation performed by Claude AI using the 6-criteria rubric on all 20 reports (5 models × 4 cases). These scores provide an objective baseline assessment of report quality.</p>
+                    </div>
+                    
+                    <!-- Model Score Cards -->
+                    <p style="text-align: center; color: var(--ki-grey); margin-bottom: 16px;">
+                        <em>📊 Overall scores based on Claude AI evaluation using standardized rubric</em>
+                    </p>
+                    <div class="model-grid">
+                        <div class="model-card">
+                            <div class="model-icon">🔮</div>
+                            <div class="model-name">Anthropic Claude</div>
+                            <div class="model-score score-excellent">3.83</div>
+                            <div class="score-label">Overall Average</div>
+                            <div style="font-size: 11px; color: var(--ki-grey); margin-top: 4px;">Consistent: 3.83 all cases</div>
+                        </div>
+                        <div class="model-card">
+                            <div class="model-icon">✨</div>
+                            <div class="model-name">Google Gemini</div>
+                            <div class="model-score score-excellent">3.75</div>
+                            <div class="score-label">Overall Average</div>
+                            <div style="font-size: 11px; color: var(--ki-grey); margin-top: 4px;">Range: 3.50-3.83</div>
+                        </div>
+                        <div class="model-card">
+                            <div class="model-icon">🔍</div>
+                            <div class="model-name">DeepSeek R1</div>
+                            <div class="model-score score-good">3.08</div>
+                            <div class="score-label">Overall Average</div>
+                            <div style="font-size: 11px; color: var(--ki-grey); margin-top: 4px;">Improved in Case IV</div>
+                        </div>
+                        <div class="model-card">
+                            <div class="model-icon">⚡</div>
+                            <div class="model-name">Grok 4</div>
+                            <div class="model-score score-good">3.04</div>
+                            <div class="score-label">Overall Average</div>
+                            <div style="font-size: 11px; color: var(--ki-grey); margin-top: 4px;">Most variable: 2.50-3.83</div>
+                        </div>
+                        <div class="model-card">
+                            <div class="model-icon">🤖</div>
+                            <div class="model-name">OpenAI GPT-4</div>
+                            <div class="model-score score-fair">2.63</div>
+                            <div class="score-label">Overall Average</div>
+                            <div style="font-size: 11px; color: var(--ki-grey); margin-top: 4px;">Incomplete analysis</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comprehensive Scoring Across All Cases -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <div class="card-title">Comprehensive Scoring Across All Cases</div>
+                        </div>
+                        <div style="padding: 0 24px 24px 24px;">
+                            <div style="background: rgba(149, 193, 31, 0.1); border-left: 4px solid var(--ki-green); padding: 12px; border-radius: 4px; margin-bottom: 16px;">
+                                <strong style="color: var(--ki-dark-blue);">📊 Evaluation Summary:</strong> Claude AI evaluated all 20 reports (5 models × 4 cases) using the 6-criteria rubric. Interesting patterns emerged:
+                            </div>
+                            
+                            <h4 style="margin: 20px 0 12px 0; color: var(--ki-dark-blue);">Overall Average Scores Across All Cases</h4>
+                            <table class="scoring-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Case I<br>Infection</th>
+                                        <th>Case II<br>Organ Damage</th>
+                                        <th>Case III<br>GFR</th>
+                                        <th>Case IV<br>Kidney</th>
+                                        <th style="background: var(--ki-plum); color: white;">Overall Average</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Anthropic Claude</strong></td>
+                                        <td>3.83</td>
+                                        <td>3.83</td>
+                                        <td>3.83</td>
+                                        <td>3.83</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google Gemini</strong></td>
+                                        <td>3.50</td>
+                                        <td>3.83</td>
+                                        <td>3.83</td>
+                                        <td>3.83</td>
+                                        <td class="score-excellent"><strong>3.75</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DeepSeek R1</strong></td>
+                                        <td>2.83</td>
+                                        <td>2.83</td>
+                                        <td>2.83</td>
+                                        <td>3.83</td>
+                                        <td class="score-good"><strong>3.08</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grok 4</strong></td>
+                                        <td>2.50</td>
+                                        <td>2.83</td>
+                                        <td>3.00</td>
+                                        <td>3.83</td>
+                                        <td class="score-good"><strong>3.04</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OpenAI GPT-4</strong></td>
+                                        <td>2.67</td>
+                                        <td>2.50</td>
+                                        <td>2.50</td>
+                                        <td>2.83</td>
+                                        <td class="score-fair"><strong>2.63</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div style="margin-top: 20px; padding: 12px; background: rgba(65, 182, 230, 0.1); border-radius: 8px;">
+                                <h4 style="margin: 0 0 12px 0; color: var(--ki-dark-blue);">Key Insights from Cross-Case Analysis:</h4>
+                                <ul style="margin: 0; padding-left: 20px;">
+                                    <li><strong>Most Consistent:</strong> Anthropic Claude maintained 3.83 across all cases</li>
+                                    <li><strong>Most Improved:</strong> DeepSeek and Grok 4 performed significantly better on Case IV (Kidney Disease)</li>
+                                    <li><strong>Best Innovation:</strong> Google Gemini excelled in Case II with novel "slow burn" hypothesis</li>
+                                    <li><strong>Most Variable:</strong> Grok 4 ranged from 2.50 to 3.83 across cases</li>
+                                    <li><strong>Consistent Underperformer:</strong> OpenAI GPT-4 had incomplete analysis across all cases</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts showing overall scores -->
+                    <div class="chart-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Multi-Dimensional Comparison (Overall)</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Overall Scores by Model</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Case Detailed Scoring -->
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="card-header">
+                            <div class="card-title">Detailed Scoring by Case</div>
+                        </div>
+                        <div style="padding: 0 24px 24px 24px;">
+                            <p style="margin-top: 16px; margin-bottom: 16px;"><strong>Case I - Infection: Detailed Scoring</strong></p>
+                            <table class="scoring-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Relevance</th>
+                                        <th>Structure</th>
+                                        <th>Understandability</th>
+                                        <th>Completeness</th>
+                                        <th>Innovation</th>
+                                        <th>Accuracy</th>
+                                        <th>Average</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Anthropic Claude</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DeepSeek R1</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td class="score-fair"><strong>2.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google Gemini</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td class="score-good"><strong>3.50</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OpenAI GPT-4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td class="score-fair"><strong>2.67</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grok 4</strong></td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td class="score-fair"><strong>2.50</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <!-- Additional Case Tables -->
+                            <p style="margin-top: 20px; margin-bottom: 16px;"><strong>Case II - Organ Damage: Detailed Scoring</strong></p>
+                            <table class="scoring-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Relevance</th>
+                                        <th>Structure</th>
+                                        <th>Understandability</th>
+                                        <th>Completeness</th>
+                                        <th>Innovation</th>
+                                        <th>Accuracy</th>
+                                        <th>Average</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Anthropic Claude</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google Gemini</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DeepSeek R1</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td class="score-fair"><strong>2.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grok 4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td class="score-fair"><strong>2.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OpenAI GPT-4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td class="score-fair"><strong>2.50</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <p style="margin-top: 20px; margin-bottom: 16px;"><strong>Case III - Glomerular Filtration Rate: Detailed Scoring</strong></p>
+                            <table class="scoring-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Relevance</th>
+                                        <th>Structure</th>
+                                        <th>Understandability</th>
+                                        <th>Completeness</th>
+                                        <th>Innovation</th>
+                                        <th>Accuracy</th>
+                                        <th>Average</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Anthropic Claude</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google Gemini</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grok 4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td class="score-good"><strong>3.00</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DeepSeek R1</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td class="score-fair"><strong>2.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OpenAI GPT-4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td class="score-fair"><strong>2.50</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <p style="margin-top: 20px; margin-bottom: 16px;"><strong>Case IV - Kidney Disease Progression: Detailed Scoring</strong></p>
+                            <table class="scoring-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Relevance</th>
+                                        <th>Structure</th>
+                                        <th>Understandability</th>
+                                        <th>Completeness</th>
+                                        <th>Innovation</th>
+                                        <th>Accuracy</th>
+                                        <th>Average</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Anthropic Claude</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DeepSeek R1</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google Gemini</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Grok 4</strong></td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>4</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td class="score-excellent"><strong>3.83</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OpenAI GPT-4</strong></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td class="score-fair"><strong>2.83</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rubric Section -->
+                <div id="rubric" class="content-section">
+                    <div class="card">
+                        <div class="rubric-info">
+                        <h3>Scoring Framework for LLM-Generated Healthcare Process Mining Reports</h3>
+                        <p>All reports are evaluated based on a comprehensive rubric designed specifically for epidemiological and healthcare process mining contexts. The rubric assesses six key criteria:</p>
+                        
+                        <table class="rubric-table">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Exemplary (4)</th>
+                                    <th>Proficient (3)</th>
+                                    <th>Needs Improvement (2)</th>
+                                    <th>Insufficient (1)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Relevance</strong></td>
+                                    <td>Fully addresses key clinical and contextual issues. Strong alignment with process map and report purpose.</td>
+                                    <td>Addresses most relevant issues; minor gaps in alignment or scope.</td>
+                                    <td>Covers topic broadly but misses core clinical/contextual focus or the process framework.</td>
+                                    <td>Misaligned with clinical context; key issues not addressed.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Structure & Presentation</strong></td>
+                                    <td>Clear, logical organization with defined sections. Effective use of tables/figures to support interpretation.</td>
+                                    <td>Generally well-structured; visuals used but may lack consistency or clarity.</td>
+                                    <td>Structure exists but is disjointed or difficult to follow. Visual aids are underused or unclear.</td>
+                                    <td>No discernible structure. Unformatted text and no visual supports.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Understandability</strong></td>
+                                    <td>Clear, concise, jargon-free language. Accessible to a broad range of stakeholders.</td>
+                                    <td>Mostly clear with minor technical or dense sections.</td>
+                                    <td>Some sections are unclear or inconsistent in tone and terminology.</td>
+                                    <td>Poorly written throughout; impedes understanding.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Completeness</strong></td>
+                                    <td>Comprehensive coverage of components: interpretation steps, clinical pathways, and KPIs.</td>
+                                    <td>Most components included but may lack depth in some areas.</td>
+                                    <td>Overview is present, but omits critical interpretive elements or performance metrics.</td>
+                                    <td>Lacks essential content. Missing interpretation or KPI references.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Innovation</strong></td>
+                                    <td>Demonstrates creative approaches or novel clinical insights beyond standard practice.</td>
+                                    <td>Shows elements of creativity or innovation; may lack full development.</td>
+                                    <td>Limited originality; relies on conventional methods without new perspectives.</td>
+                                    <td>No evidence of innovation; basic, derivative, or rote output.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Accuracy</strong></td>
+                                    <td>Clinically and contextually accurate. Terminology and figures aligned with process map and domain standards.</td>
+                                    <td>Mostly accurate with minor issues that don't affect the core message.</td>
+                                    <td>Noticeable errors in clinical interpretation, terms, or figure use.</td>
+                                    <td>Major inaccuracies or misinterpretations compromising validity.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <p style="margin-top: 16px;"><strong>Scoring Scale:</strong> 
+                            <span class="score-excellent">Exemplary (4)</span> | 
+                            <span class="score-good">Proficient (3)</span> | 
+                            <span class="score-fair">Needs Improvement (2)</span> | 
+                            <span class="score-poor">Insufficient (1)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orchestrated Reports Section -->
+        <div id="orchestrated" class="content-section">
+            <div class="card">
+                <h3 class="headline-medium">Orchestrated Reports - Multi-Model Synthesis</h3>
+                <p class="body-large" style="margin: 16px 0;">These orchestrated reports consolidate insights from all 5 language models (Anthropic Claude, DeepSeek R1, Google Gemini, OpenAI GPT-4, and Grok 4) to provide comprehensive, unified analyses. Each report preserves the best insights from individual models while identifying consensus findings and areas of disagreement.</p>
+                
+                <!-- Case Selector for Orchestrated Reports -->
+                <div class="filter-controls" style="margin: 24px 0;">
+                    <label for="orchestratedCaseSelect" class="title-medium">Select Case:</label>
+                    <select id="orchestratedCaseSelect" onchange="loadOrchestratedReport()">
+                        <option value="case1">Case I - Infection Progression</option>
+                        <option value="case2">Case II - Organ Damage</option>
+                        <option value="case3">Case III - Glomerular Filtration Rate</option>
+                        <option value="case4">Case IV - Kidney Disease Progression</option>
+                    </select>
+                </div>
+                
+                <!-- Orchestrated Report Info -->
+                <div class="case-info" style="margin: 24px 0;">
+                    <h4 id="orchestratedCaseTitle" class="title-large">Case I - Infection Progression</h4>
+                    <p id="orchestratedCaseDescription" class="body-large">Consolidated analysis from 5 models examining infection progression patterns in sepsis patients.</p>
+                </div>
+                
+                <!-- Orchestrated Report Content -->
+                <div class="report-display">
+                    <div id="orchestratedReportContent" class="report-content">
+                        <p>Loading orchestrated report...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prompts Section -->
+        <div id="prompts" class="content-section">
+            <div class="card">
+                <h3 class="headline-medium">LLM Analysis Prompts</h3>
+                <p class="body-large" style="margin: 16px 0;">These are the prompts used to generate reports from different language models for each case, as well as the orchestration prompt used to consolidate multiple reports.</p>
+                
+                <!-- Prompt Type Selector -->
+                <div class="filter-controls" style="margin: 24px 0;">
+                    <label for="promptTypeSelect" class="title-medium">Select Prompt Type:</label>
+                    <select id="promptTypeSelect" onchange="loadPrompt()" style="margin-left: 12px;">
+                        <option value="analysis_case1">Case I - Infection Analysis</option>
+                        <option value="analysis_case2">Case II - Organ Damage Analysis</option>
+                        <option value="analysis_case3">Case III - GFR Analysis</option>
+                        <option value="analysis_case4">Case IV - Kidney Disease Analysis</option>
+                        <option value="orchestration">Report Orchestration</option>
+                        <option value="evaluation">Report Evaluation</option>
+                    </select>
+                </div>
+                
+                <!-- Prompt Info -->
+                <div class="prompt-info" style="margin: 24px 0;">
+                    <h4 id="promptTitle" class="title-large">Case I - Infection Analysis</h4>
+                    <p id="promptDescription" class="body-large">Prompt for analyzing infection progression patterns in sepsis patients</p>
+                </div>
+                
+                <!-- Prompt Display -->
+                <div class="prompt-display" style="background: var(--ki-light-grey); padding: 24px; border-radius: 8px; margin-top: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h5 class="title-medium">Prompt Content</h5>
+                        <button onclick="copyPrompt()" class="tab" style="padding: 8px 16px; background: var(--ki-plum); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <span class="material-icons-round" style="font-size: 16px; vertical-align: middle;">content_copy</span>
+                            Copy Prompt
+                        </button>
+                    </div>
+                    <pre id="promptContent" style="white-space: pre-wrap; font-family: 'Roboto Mono', monospace; font-size: 14px; line-height: 1.6; max-height: 600px; overflow-y: auto; background: white; padding: 20px; border-radius: 4px; border: 1px solid var(--ki-grey);">Loading prompt...</pre>
+                </div>
+                
+                <!-- Additional Information -->
+                <div class="card" style="margin-top: 24px; background: linear-gradient(135deg, rgba(166, 36, 157, 0.05) 0%, rgba(35, 44, 101, 0.05) 100%); border-left: 4px solid var(--ki-plum);">
+                    <h5 class="title-medium">How These Prompts Work</h5>
+                    <ul style="line-height: 1.8; color: var(--ki-dark-grey);">
+                        <li><strong>Analysis Prompts</strong>: Used with each LLM (Anthropic, DeepSeek, Gemini, OpenAI, Grok) to generate individual reports for each case</li>
+                        <li><strong>Orchestration Prompt</strong>: Used with Claude to consolidate all 5 model reports into a unified analysis</li>
+                        <li><strong>Evaluation Prompt</strong>: Used to score each report based on the 6-criteria rubric</li>
+                        <li>All prompts emphasize clinical relevance, actionable insights, and clear communication</li>
+                        <li>Process mining data (matrices and maps) are provided alongside these prompts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expert Evaluation Section (Placeholder) -->
+        <div id="expert_evaluation" class="content-section">
+            <div class="card">
+                <h3 class="headline-medium">Expert Evaluation Results</h3>
+                <p class="body-large" style="margin: 16px 0;">Human expert evaluation of the AI-generated reports by clinical and epidemiological specialists.</p>
+                
+                <!-- Placeholder Message -->
+                <div class="card" style="margin: 32px 0; background: linear-gradient(135deg, rgba(65, 182, 230, 0.1), rgba(166, 36, 157, 0.1)); border-left: 4px solid var(--ki-blue); padding: 24px;">
+                    <div style="text-align: center;">
+                        <span class="material-icons-round" style="font-size: 64px; color: var(--ki-blue); margin-bottom: 16px;">hourglass_empty</span>
+                        <h4 class="title-large" style="color: var(--ki-dark-blue); margin: 16px 0;">Expert Evaluation In Progress</h4>
+                        <p class="body-large" style="color: var(--ki-dark-grey); max-width: 600px; margin: 16px auto;">
+                            Clinical and epidemiological experts are currently reviewing the AI-generated reports. 
+                            Expert scores will be available once the evaluation process is complete.
+                        </p>
+                        <p class="body-medium" style="color: var(--ki-grey); margin-top: 24px;">
+                            <strong>Expected Timeline:</strong> Results will be updated here once expert review is finalized
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- What to Expect -->
+                <div class="card" style="margin-top: 24px;">
+                    <h4 class="title-large">What Will Be Evaluated</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div style="padding: 16px; background: var(--ki-light-grey); border-radius: 8px;">
+                            <h5 class="title-medium" style="color: var(--ki-plum); margin-bottom: 8px;">
+                                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">fact_check</span>
+                                Clinical Accuracy
+                            </h5>
+                            <p class="body-medium">Verification of medical interpretations and clinical relevance</p>
+                        </div>
+                        <div style="padding: 16px; background: var(--ki-light-grey); border-radius: 8px;">
+                            <h5 class="title-medium" style="color: var(--ki-blue); margin-bottom: 8px;">
+                                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">insights</span>
+                                Process Mining Validity
+                            </h5>
+                            <p class="body-medium">Assessment of process analysis accuracy and pathway interpretation</p>
+                        </div>
+                        <div style="padding: 16px; background: var(--ki-light-grey); border-radius: 8px;">
+                            <h5 class="title-medium" style="color: var(--ki-green); margin-bottom: 8px;">
+                                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">lightbulb</span>
+                                Practical Value
+                            </h5>
+                            <p class="body-medium">Evaluation of actionability and implementation feasibility</p>
+                        </div>
+                        <div style="padding: 16px; background: var(--ki-light-grey); border-radius: 8px;">
+                            <h5 class="title-medium" style="color: var(--ki-orange); margin-bottom: 8px;">
+                                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">psychology</span>
+                                Innovation Quality
+                            </h5>
+                            <p class="body-medium">Assessment of novel insights and research hypotheses</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expert Panel Info -->
+                <div class="card" style="margin-top: 24px;">
+                    <h4 class="title-large">Expert Review Panel</h4>
+                    <p class="body-large" style="margin: 16px 0;">
+                        The evaluation will be conducted by a multidisciplinary panel including:
+                    </p>
+                    <ul style="line-height: 1.8; color: var(--ki-dark-grey);">
+                        <li>Clinical specialists in sepsis and critical care</li>
+                        <li>Epidemiologists with process mining expertise</li>
+                        <li>Healthcare quality improvement specialists</li>
+                        <li>Medical informatics researchers</li>
+                    </ul>
+                    <p class="body-medium" style="margin-top: 16px; color: var(--ki-grey);">
+                        Each report will be independently scored by multiple experts using the same 6-criteria rubric used for AI evaluation.
+                    </p>
+                </div>
+                
+                <!-- Comparison Preview -->
+                <div class="card" style="margin-top: 24px; background: linear-gradient(135deg, rgba(166, 36, 157, 0.05), rgba(35, 44, 101, 0.05));">
+                    <h4 class="title-large">Coming Soon: AI vs Expert Comparison</h4>
+                    <p class="body-large" style="margin: 16px 0;">
+                        Once expert evaluation is complete, this section will include:
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 20px;">
+                        <div style="text-align: center;">
+                            <span class="material-icons-round" style="font-size: 48px; color: var(--ki-plum);">compare_arrows</span>
+                            <p class="body-medium" style="margin-top: 8px;">Score comparisons between AI and expert evaluations</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <span class="material-icons-round" style="font-size: 48px; color: var(--ki-blue);">bar_chart</span>
+                            <p class="body-medium" style="margin-top: 8px;">Detailed analysis of scoring differences</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <span class="material-icons-round" style="font-size: 48px; color: var(--ki-green);">trending_up</span>
+                            <p class="body-medium" style="margin-top: 8px;">Insights on AI evaluation reliability</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <p>© 2024 HealthProcessAI | Developed at SMAILE, Karolinska Institutet</p>
+            <p><a href="index.html">Back to Main Page</a> | <a href="https://github.com/smaile/healthprocessai">GitHub</a></p>
+        </div>
+    </footer>
+
+    <!-- Add marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Actual report data from markdown files -->
+    <script src="actual_reports.js"></script>
+    
+    <!-- Orchestrated reports data -->
+    <script src="orchestrated_reports.js"></script>
+    
+    <!-- Prompts data -->
+    <script src="prompts_data.js"></script>
+    
+    <script>
+        // Case information
+        const caseInfo = {
+            case1: {
+                title: "Case I - Infection Progression",
+                description: "This case analyzes the progression of infection in sepsis patients, tracking the evolution from initial symptoms through various stages of infection. The process map reveals critical decision points where early intervention can significantly impact patient outcomes.",
+                image: "images/case1_processMap.png"
+            },
+            case2: {
+                title: "Case II - Organ Damage",
+                description: "This case examines organ damage patterns in sepsis patients, comparing pathways between patients who develop organ dysfunction and those who don't. The analysis highlights the critical time windows for organ support interventions.",
+                image: "images/case2_processMap.png"
+            },
+            case3: {
+                title: "Case III - Glomerular Filtration Rate",
+                description: "This case focuses on kidney function monitoring through glomerular filtration rate (GFR) measurements. The process map shows the progression of kidney dysfunction and the timing of renal replacement therapy decisions.",
+                image: "images/case3_processMap.png"
+            },
+            case4: {
+                title: "Case IV - Kidney Disease Progression",
+                description: "This case tracks the long-term progression of kidney disease in sepsis survivors. The analysis reveals patterns in chronic kidney disease development and identifies opportunities for preventive interventions.",
+                image: "images/case4_processMap.png"
+            }
+        };
+
+        // Initialize with empty report data (will be overwritten by actual_reports.js)
+        if (typeof reportData === 'undefined') {
+            var reportData = {
+                case1: {},
+                case2: {},
+                case3: {},
+                case4: {}
+            };
+        }
+
+        let currentCase = 'case1';
+        let currentModel = 'anthropic';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+            
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'ai_evaluation') initializeCharts();
+            if (tabName === 'orchestrated') loadOrchestratedReport();
+            if (tabName === 'prompts') loadPrompt();
+            if (tabName === 'expert_evaluation') loadExpertEvaluation();
+        }
+
+        function selectModel(model) {
+            currentModel = model;
+            document.querySelectorAll('.model-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            loadReport();
+        }
+
+        function loadReports() {
+            currentCase = document.getElementById('caseSelect').value;
+            updateCaseInfo();
+            loadReport();
+        }
+
+        function updateCaseInfo() {
+            const info = caseInfo[currentCase];
+            if (info) {
+                document.getElementById('processMapImage').src = info.image;
+                document.getElementById('caseTitle').textContent = info.title;
+                document.getElementById('caseDescription').textContent = info.description;
+            }
+        }
+
+        function loadReport() {
+            const content = document.getElementById('reportContent');
+            if (reportData[currentCase] && reportData[currentCase][currentModel]) {
+                const markdownContent = reportData[currentCase][currentModel].content;
+                const htmlContent = marked.parse(markdownContent);
+                content.innerHTML = htmlContent;
+            } else {
+                content.innerHTML = "<p>Report not available for this combination.</p>";
+            }
+        }
+        
+        function openImageFullscreen(img) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                cursor: pointer;
+            `;
+            
+            const fullImg = document.createElement('img');
+            fullImg.src = img.src;
+            fullImg.style.cssText = `
+                max-width: 90%;
+                max-height: 90%;
+                object-fit: contain;
+            `;
+            
+            modal.appendChild(fullImg);
+            modal.onclick = () => document.body.removeChild(modal);
+            document.body.appendChild(modal);
+        }
+
+        function initializeCharts() {
+            // Radar Chart
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Relevance', 'Structure', 'Understandability', 'Completeness', 'Innovation', 'Accuracy'],
+                    datasets: [
+                        {
+                            label: 'Anthropic Claude',
+                            data: [4, 4, 4, 4, 3, 4],
+                            borderColor: '#A6249D',
+                            backgroundColor: 'rgba(166, 36, 157, 0.2)'
+                        },
+                        {
+                            label: 'DeepSeek R1',
+                            data: [3, 3, 3, 3, 2, 3],
+                            borderColor: '#232C65',
+                            backgroundColor: 'rgba(35, 44, 101, 0.2)'
+                        },
+                        {
+                            label: 'Google Gemini',
+                            data: [4, 4, 4, 3, 3, 3],
+                            borderColor: '#41B6E6',
+                            backgroundColor: 'rgba(65, 182, 230, 0.2)'
+                        },
+                        {
+                            label: 'OpenAI GPT-4',
+                            data: [3, 3, 3, 3, 2, 2],
+                            borderColor: '#95C11F',
+                            backgroundColor: 'rgba(149, 193, 31, 0.2)'
+                        },
+                        {
+                            label: 'Grok 4',
+                            data: [2, 3, 3, 3, 2, 2],
+                            borderColor: '#FAB919',
+                            backgroundColor: 'rgba(250, 185, 25, 0.2)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 4 } }
+                }
+            });
+
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Anthropic', 'DeepSeek', 'Google', 'OpenAI', 'Grok'],
+                    datasets: [{
+                        label: 'Average Score',
+                        data: [3.83, 2.83, 3.50, 2.67, 2.50],
+                        backgroundColor: ['#95C11F', '#FAB919', '#41B6E6', '#FAB919', '#E8500E']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 4 } }
+                }
+            });
+        }
+
+        // Orchestrated report functions
+        function loadOrchestratedReport() {
+            const caseSelect = document.getElementById('orchestratedCaseSelect');
+            const selectedCase = caseSelect ? caseSelect.value : 'case1';
+            const content = document.getElementById('orchestratedReportContent');
+            
+            if (orchestratedReports[selectedCase]) {
+                const report = orchestratedReports[selectedCase];
+                document.getElementById('orchestratedCaseTitle').textContent = report.title;
+                document.getElementById('orchestratedCaseDescription').textContent = report.description;
+                
+                if (content) {
+                    let htmlContent = marked.parse(report.content);
+                    
+                    // Add highlighting for model names with icons
+                    const modelReplacements = [
+                        { pattern: /\[Anthropic(?:\s+Sonnet-4)?\]/g, class: 'model-anthropic', icon: '🤖', name: 'Anthropic' },
+                        { pattern: /\[DeepSeek(?:\s+R1)?\]/g, class: 'model-deepseek', icon: '🔍', name: 'DeepSeek' },
+                        { pattern: /\[Google(?:\s+Gemini(?:\s+2\.5\s+Pro)?)?\]/g, class: 'model-google', icon: '🌟', name: 'Gemini' },
+                        { pattern: /\[Gemini\]/g, class: 'model-google', icon: '🌟', name: 'Gemini' },
+                        { pattern: /\[OpenAI(?:\s+GPT-4(?:\.1)?)?\]/g, class: 'model-openai', icon: '💡', name: 'OpenAI' },
+                        { pattern: /\[GPT-4(?:\.1)?\]/g, class: 'model-openai', icon: '💡', name: 'GPT-4' },
+                        { pattern: /\[X-AI\s+Grok(?:-4)?\]/g, class: 'model-grok', icon: '⚡', name: 'Grok' },
+                        { pattern: /\[Grok(?:-4)?\]/g, class: 'model-grok', icon: '⚡', name: 'Grok' }
+                    ];
+                    
+                    modelReplacements.forEach(model => {
+                        htmlContent = htmlContent.replace(model.pattern, 
+                            `<span class="${model.class}"><span class="model-icon">${model.icon}</span>${model.name}</span>`);
+                    });
+                    
+                    // Also highlight inline model mentions
+                    htmlContent = htmlContent.replace(/\[All Models\]/g, 
+                        '<span class="consensus-badge">All Models</span>');
+                    htmlContent = htmlContent.replace(/\[Multi-Model Consensus\]/g, 
+                        '<span class="consensus-badge">Consensus</span>');
+                    htmlContent = htmlContent.replace(/\[Multiple Models\]/g, 
+                        '<span class="consensus-badge">Multiple Models</span>');
+                    
+                    // Add better table styling
+                    htmlContent = htmlContent.replace(/<table>/g, '<table class="orchestrated-table">');
+                    
+                    // Add icons for checkmarks and warnings
+                    htmlContent = htmlContent.replace(/✅/g, '<span style="color: var(--ki-green);">✅</span>');
+                    htmlContent = htmlContent.replace(/⚠️/g, '<span style="color: var(--ki-orange);">⚠️</span>');
+                    
+                    content.innerHTML = htmlContent;
+                }
+            }
+        }
+        
+        // Prompt functions
+        function loadPrompt() {
+            const promptSelect = document.getElementById('promptTypeSelect');
+            const selectedPrompt = promptSelect ? promptSelect.value : 'analysis_case1';
+            
+            let promptInfo = null;
+            
+            if (selectedPrompt.startsWith('analysis_')) {
+                const caseKey = selectedPrompt.replace('analysis_', '');
+                promptInfo = promptsData.analysis[caseKey];
+            } else if (selectedPrompt === 'orchestration') {
+                promptInfo = promptsData.orchestration;
+            } else if (selectedPrompt === 'evaluation') {
+                promptInfo = promptsData.evaluation;
+            }
+            
+            if (promptInfo) {
+                document.getElementById('promptTitle').textContent = promptInfo.title;
+                document.getElementById('promptDescription').textContent = promptInfo.description;
+                document.getElementById('promptContent').textContent = promptInfo.prompt;
+            }
+        }
+        
+        function copyPrompt() {
+            const promptContent = document.getElementById('promptContent').textContent;
+            navigator.clipboard.writeText(promptContent).then(() => {
+                // Show feedback
+                const button = event.target.closest('button');
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<span class="material-icons-round" style="font-size: 16px; vertical-align: middle;">check</span> Copied!';
+                button.style.background = 'var(--ki-green)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.style.background = 'var(--ki-plum)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy prompt:', err);
+                alert('Failed to copy prompt to clipboard');
+            });
+        }
+        
+        // Expert Evaluation placeholder function
+        function loadExpertEvaluation() {
+            // Placeholder function - will be implemented when expert evaluation data is available
+            console.log('Expert evaluation section loaded - awaiting expert review data');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCaseInfo();
+            loadReport();
+        });
+    </script>
+</body>
+</html>

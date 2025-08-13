@@ -1,0 +1,37 @@
+{
+  "case1": {
+    "anthropic": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "deepseek": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 3, "average": 2.83},
+    "google": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 3, "innovation": 3, "accuracy": 3, "average": 3.50},
+    "openai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 2, "average": 2.67},
+    "xai": {"relevance": 2, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 2, "average": 2.50}
+  },
+  "case2": {
+    "anthropic": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "deepseek": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 3, "average": 2.83},
+    "google": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 4, "accuracy": 3, "average": 3.83},
+    "openai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 2, "innovation": 2, "accuracy": 2, "average": 2.50},
+    "xai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 3, "average": 2.83}
+  },
+  "case3": {
+    "anthropic": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "deepseek": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 3, "average": 2.83},
+    "google": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "openai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 2, "innovation": 2, "accuracy": 2, "average": 2.50},
+    "xai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 3, "accuracy": 3, "average": 3.00}
+  },
+  "case4": {
+    "anthropic": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "deepseek": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "google": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83},
+    "openai": {"relevance": 3, "structure": 3, "understandability": 3, "completeness": 3, "innovation": 2, "accuracy": 3, "average": 2.83},
+    "xai": {"relevance": 4, "structure": 4, "understandability": 4, "completeness": 4, "innovation": 3, "accuracy": 4, "average": 3.83}
+  },
+  "overall": {
+    "anthropic": 3.83,
+    "deepseek": 3.08,
+    "google": 3.75,
+    "openai": 2.63,
+    "xai": 3.04
+  }
+}

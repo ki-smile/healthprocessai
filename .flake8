@@ -1,0 +1,49 @@
+[flake8]
+# Configuration for flake8 linting
+
+# Set max line length to match Black's default
+max-line-length = 88
+
+# Extend the default ignore list
+extend-ignore = 
+    # E203: whitespace before ':' (conflicts with Black)
+    E203,
+    # W503: line break before binary operator (conflicts with Black)
+    W503,
+    # E501: line too long (handled by max-line-length)
+    E501,
+    # F841: local variable assigned but never used (common in examples)
+    F841,
+
+# Exclude directories
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    .mypy_cache,
+    .pytest_cache,
+    migrations,
+    legacy_original,
+    website,
+    reports,
+    data,
+    resources,
+    docs
+
+# Set complexity threshold
+max-complexity = 10
+
+# Per-file ignores for specific cases
+per-file-ignores =
+    # Ignore imports in __init__ files
+    __init__.py:F401,F403
+    # Ignore complexity in test files
+    test_*.py:C901
+    # Ignore unused imports in example files
+    example_*.py:F401

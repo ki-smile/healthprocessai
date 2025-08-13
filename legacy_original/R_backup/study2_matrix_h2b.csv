@@ -1,0 +1,8 @@
+"antecedent","consequent","n","flow_time"
+"DEATH","End",211,0
+"Decline30%","DEATH",31,45.9769585253456
+"Decline30%","End",298,0
+"H2B","DEATH",180,68.4896825396825
+"H2B","Decline30%",329,77.8710377768129
+"H2B","End",9265,0
+"Start","H2B",9774,0

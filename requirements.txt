@@ -1,0 +1,52 @@
+# HealthProcessAI - Python Requirements
+# Process Mining Framework for Healthcare & Life Sciences
+# Developed at SMAILE, Karolinska Institutet
+
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+pm4py>=2.7.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+scipy>=1.10.0
+
+# Process mining and visualization
+graphviz>=0.20.0
+pydot>=1.4.2
+networkx>=3.0
+
+# API and web requests
+requests>=2.28.0
+
+# Date and time handling
+python-dateutil>=2.8.2
+
+# Data formats
+openpyxl>=3.1.0  # Excel support
+xlrd>=2.0.1      # Legacy Excel support
+
+# Testing
+pytest>=7.2.0
+pytest-cov>=4.0.0
+unittest-xml-reporting>=3.2.0
+
+# Documentation and reporting
+jupyter>=1.0.0
+nbconvert>=7.2.0
+markdown>=3.4.0
+weasyprint>=58.0  # PDF generation from HTML/Markdown
+pypdf>=3.0.0      # PDF manipulation
+
+# Optional: Advanced analytics
+scikit-learn>=1.2.0
+statsmodels>=0.13.0
+
+# Optional: Development tools
+black>=23.0.0     # Code formatting
+flake8>=6.0.0     # Linting
+mypy>=1.0.0       # Type checking
+ipykernel>=6.20.0 # Jupyter kernel
+
+# Optional: API enhancement
+python-dotenv>=1.0.0  # Environment variable management
+pydantic>=2.0.0       # Data validation

@@ -1,0 +1,46 @@
+# Development dependencies for HealthProcessAI
+# =============================================
+# These packages are required for development, testing, and code quality
+
+# Code Formatting & Quality
+black>=23.0.0           # Code formatter
+flake8>=6.0.0          # Style guide enforcement
+mypy>=1.0.0            # Static type checker
+isort>=5.12.0          # Import sorting
+autopep8>=2.0.0        # PEP8 auto-formatting
+
+# Type Stubs for mypy
+types-requests>=2.31.0
+types-markdown>=3.5.0
+types-setuptools>=68.2.0
+types-PyYAML>=6.0.0
+
+# Testing
+pytest>=7.4.0          # Testing framework
+pytest-cov>=4.1.0      # Test coverage
+pytest-mock>=3.11.0    # Mocking for tests
+pytest-timeout>=2.1.0  # Test timeouts
+
+# Documentation
+sphinx>=7.0.0          # Documentation generation
+sphinx-rtd-theme>=1.3.0 # ReadTheDocs theme
+myst-parser>=2.0.0     # Markdown support for Sphinx
+
+# Development Tools
+ipython>=8.14.0        # Enhanced Python shell
+jupyter>=1.0.0         # Jupyter notebooks
+jupyterlab>=4.0.0      # JupyterLab environment
+notebook>=7.0.0        # Classic notebook
+
+# Pre-commit hooks
+pre-commit>=3.3.0      # Git hooks for code quality
+commitizen>=3.5.0      # Conventional commits
+
+# Build Tools
+build>=0.10.0          # PEP 517 package builder
+twine>=4.0.0           # PyPI upload tool
+wheel>=0.41.0          # Wheel package support
+
+# Debugging
+ipdb>=0.13.0           # IPython debugger
+pdbpp>=0.10.0          # Enhanced pdb

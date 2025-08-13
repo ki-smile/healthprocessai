@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthProcessAI - Process Mining Framework | SMAILE, Karolinska Institutet</title>
+    
+    <!-- Material Design 3 Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    
+    <style>
+        /* KI Color Palette Variables */
+        :root {
+            /* Primary KI Colors */
+            --ki-plum: #A6249D;
+            --ki-dark-plum: #82276C;
+            --ki-fuchsia: #E4007E;
+            --ki-dark-blue: #232C65;
+            --ki-blue: #0093BD;
+            
+            /* Secondary KI Colors */
+            --ki-turquoise: #00ABBE;
+            --ki-light-blue: #41B6E6;
+            --ki-green: #95C11F;
+            --ki-yellow: #FAB919;
+            --ki-orange: #E8500E;
+            
+            /* Neutral Colors */
+            --ki-black: #000000;
+            --ki-dark-grey: #4D4D4F;
+            --ki-grey: #ACABAB;
+            --ki-light-grey: #E6E6E6;
+            --ki-background: #FAFAFA;
+            --ki-white: #FFFFFF;
+            
+            /* Material Design 3 Elevation */
+            --md-elevation-1: 0 1px 2px 0 rgba(0,0,0,0.05);
+            --md-elevation-2: 0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 6px 0 rgba(0,0,0,0.04);
+            --md-elevation-3: 0 4px 6px -2px rgba(0,0,0,0.08), 0 8px 10px 1px rgba(0,0,0,0.04);
+            --md-elevation-4: 0 6px 10px -3px rgba(0,0,0,0.10), 0 12px 18px 2px rgba(0,0,0,0.04);
+            --md-elevation-5: 0 8px 12px -4px rgba(0,0,0,0.12), 0 16px 24px 2px rgba(0,0,0,0.04);
+        }
+        
+        /* Material Design 3 Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--ki-dark-grey);
+            background: var(--ki-background);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Material Design 3 Typography Scale */
+        .display-large {
+            font-size: 57px;
+            line-height: 64px;
+            font-weight: 400;
+            letter-spacing: -0.25px;
+        }
+        
+        .display-medium {
+            font-size: 45px;
+            line-height: 52px;
+            font-weight: 400;
+        }
+        
+        .display-small {
+            font-size: 36px;
+            line-height: 44px;
+            font-weight: 400;
+        }
+        
+        .headline-large {
+            font-size: 32px;
+            line-height: 40px;
+            font-weight: 400;
+        }
+        
+        .headline-medium {
+            font-size: 28px;
+            line-height: 36px;
+            font-weight: 400;
+        }
+        
+        .title-large {
+            font-size: 22px;
+            line-height: 28px;
+            font-weight: 500;
+        }
+        
+        .body-large {
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+        }
+        
+        /* Header with Material Design 3 Surface */
+        header {
+            background: var(--ki-white);
+            box-shadow: var(--md-elevation-2);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--ki-plum);
+            font-size: 20px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-plum) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ki-white);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 8px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ki-dark-grey);
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            background: var(--ki-light-grey);
+            color: var(--ki-plum);
+        }
+        
+        /* Hero Section with KI Gradient */
+        .hero {
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-dark-blue) 100%);
+            padding: 140px 0 80px;
+            text-align: center;
+            color: var(--ki-white);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            margin-bottom: 16px;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 32px;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.8s 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        
+        /* Material Design 3 Buttons */
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            animation: fadeInUp 0.8s 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        
+        .btn {
+            padding: 0 24px;
+            height: 40px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-filled {
+            background: var(--ki-white);
+            color: var(--ki-plum);
+            box-shadow: var(--md-elevation-1);
+        }
+        
+        .btn-filled:hover {
+            box-shadow: var(--md-elevation-3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outlined {
+            background: transparent;
+            color: var(--ki-white);
+            border: 1px solid var(--ki-white);
+        }
+        
+        .btn-outlined:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Material Design 3 Cards */
+        .surface {
+            background: var(--ki-white);
+            border-radius: 12px;
+            padding: 80px 0;
+            margin-top: -40px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: var(--ki-dark-blue);
+            margin-bottom: 48px;
+        }
+        
+        /* Feature Cards with Material Design 3 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .feature-card {
+            background: var(--ki-white);
+            border: 1px solid var(--ki-light-grey);
+            padding: 24px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .feature-card:hover {
+            box-shadow: var(--md-elevation-3);
+            transform: translateY(-4px);
+            border-color: var(--ki-plum);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--ki-light-blue) 0%, var(--ki-blue) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: var(--ki-white);
+        }
+        
+        .feature-card h3 {
+            color: var(--ki-dark-blue);
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            color: var(--ki-dark-grey);
+            line-height: 1.6;
+        }
+        
+        /* Pipeline Section with Material Design 3 */
+        .pipeline {
+            background: var(--ki-background);
+            padding: 80px 0;
+        }
+        
+        .pipeline-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 24px 0;
+        }
+        
+        .pipeline-step {
+            flex: 0 0 240px;
+            background: var(--ki-white);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--md-elevation-1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .pipeline-step:hover {
+            box-shadow: var(--md-elevation-3);
+            transform: scale(1.02);
+        }
+        
+        .step-badge {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--ki-plum) 0%, var(--ki-fuchsia) 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: var(--ki-white);
+            font-weight: 500;
+            font-size: 24px;
+        }
+        
+        .pipeline-step h3 {
+            color: var(--ki-dark-blue);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .pipeline-step p {
+            color: var(--ki-grey);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* Code Examples with Material Design 3 */
+        .code-section {
+            background: var(--ki-white);
+            padding: 80px 0;
+        }
+        
+        .tab-container {
+            background: var(--ki-background);
+            border-radius: 16px;
+            padding: 4px;
+            display: inline-flex;
+            margin-bottom: 24px;
+        }
+        
+        .tab-button {
+            padding: 8px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--ki-dark-grey);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .tab-button.active {
+            background: var(--ki-white);
+            color: var(--ki-plum);
+            box-shadow: var(--md-elevation-1);
+        }
+        
+        .code-content {
+            background: var(--ki-dark-blue);
+            color: var(--ki-white);
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            box-shadow: var(--md-elevation-2);
+        }
+        
+        .code-content pre {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Tutorial Cards with Material Design 3 */
+        .tutorials {
+            background: var(--ki-background);
+            padding: 80px 0;
+        }
+        
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+        
+        .tutorial-card {
+            background: var(--ki-white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--md-elevation-1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .tutorial-card:hover {
+            box-shadow: var(--md-elevation-4);
+            transform: translateY(-4px);
+        }
+        
+        .tutorial-header {
+            background: linear-gradient(135deg, var(--ki-blue) 0%, var(--ki-turquoise) 100%);
+            color: var(--ki-white);
+            padding: 24px;
+        }
+        
+        .tutorial-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .tutorial-content {
+            padding: 24px;
+        }
+        
+        .tutorial-list {
+            list-style: none;
+        }
+        
+        .tutorial-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--ki-light-grey);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--ki-dark-grey);
+        }
+        
+        .tutorial-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .check-icon {
+            color: var(--ki-green);
+            font-size: 20px;
+        }
+        
+        /* Use Cases with KI Colors */
+        .use-cases {
+            background: var(--ki-white);
+            padding: 80px 0;
+        }
+        
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        .case-card {
+            background: var(--ki-white);
+            border: 2px solid var(--ki-light-grey);
+            padding: 32px;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--ki-plum), var(--ki-fuchsia), var(--ki-blue), var(--ki-green));
+        }
+        
+        .case-card:nth-child(1)::before { background: var(--ki-fuchsia); }
+        .case-card:nth-child(2)::before { background: var(--ki-blue); }
+        .case-card:nth-child(3)::before { background: var(--ki-green); }
+        .case-card:nth-child(4)::before { background: var(--ki-orange); }
+        
+        .case-card:hover {
+            box-shadow: var(--md-elevation-3);
+            transform: translateY(-4px);
+            border-color: var(--ki-plum);
+        }
+        
+        .case-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--ki-light-grey);
+            border-radius: 8px;
+            font-weight: 500;
+            color: var(--ki-dark-blue);
+            margin-bottom: 16px;
+        }
+        
+        .case-card h3 {
+            color: var(--ki-dark-blue);
+            margin-bottom: 12px;
+        }
+        
+        .case-card p {
+            color: var(--ki-dark-grey);
+            line-height: 1.6;
+        }
+        
+        /* Footer with KI Style */
+        footer {
+            background: var(--ki-dark-blue);
+            color: var(--ki-white);
+            padding: 48px 0 24px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 32px;
+        }
+        
+        .footer-brand h3 {
+            margin-bottom: 12px;
+            color: var(--ki-white);
+        }
+        
+        .footer-brand p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 16px;
+            color: var(--ki-white);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            padding: 4px 0;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--ki-white);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 24px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .display-large {
+                font-size: 40px;
+                line-height: 48px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .pipeline-container {
+                flex-direction: column;
+            }
+            
+            .pipeline-step {
+                flex: 1 1 auto;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-grid,
+            .tutorial-grid,
+            .case-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Material Design 3 Ripple Effect */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple:active::after {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="material-icons-round">biotech</span>
+                </div>
+                <span>HealthProcessAI</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pipeline">Pipeline</a></li>
+                <li><a href="#tutorials">Tutorials</a></li>
+                <li><a href="#use-cases">Use Cases</a></li>
+                <li><a href="llm_evaluation.html">LLM Evaluation</a></li>
+                <li><a href="https://github.com/smaile/healthprocessai" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="display-large">HealthProcessAI</h1>
+            <p class="body-large">Process Mining Framework for Healthcare & Life Sciences<br>Discover patterns in clinical pathways, disease progression, and epidemiological data with AI-powered insights</p>
+            <div class="cta-buttons">
+                <a href="#tutorials" class="btn btn-filled ripple">
+                    <span class="material-icons-round">school</span>
+                    Start Learning
+                </a>
+                <a href="https://github.com/your-repo" class="btn btn-outlined">
+                    <span class="material-icons-round">code</span>
+                    View Source
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="surface">
+        <div class="container">
+            <h2 class="headline-large section-title">Why Process Mining in Healthcare?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">analytics</span>
+                    </div>
+                    <h3 class="title-large">Data-Driven Insights</h3>
+                    <p class="body-large">Transform electronic health records into actionable insights about patient pathways and clinical processes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">psychology</span>
+                    </div>
+                    <h3 class="title-large">Clinical Pattern Discovery</h3>
+                    <p class="body-large">Identify patterns in sepsis progression, treatment variations, and patient outcomes using advanced algorithms.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">smart_toy</span>
+                    </div>
+                    <h3 class="title-large">AI-Powered Analysis</h3>
+                    <p class="body-large">Leverage multiple LLMs including Claude, GPT-4, and Gemini to generate clinical reports and recommendations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">code</span>
+                    </div>
+                    <h3 class="title-large">Python & R Support</h3>
+                    <p class="body-large">Complete implementations in both Python (PM4PY) and R (bupaR) with modular, reusable components.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">menu_book</span>
+                    </div>
+                    <h3 class="title-large">Educational Framework</h3>
+                    <p class="body-large">Comprehensive tutorials, exercises, and real-world examples designed for healthcare professionals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">verified</span>
+                    </div>
+                    <h3 class="title-large">Production Ready</h3>
+                    <p class="body-large">Includes unit tests, integration tests, and best practices for deploying in clinical environments.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="material-icons-round">assessment</span>
+                    </div>
+                    <h3 class="title-large">LLM Report Evaluation</h3>
+                    <p class="body-large">Compare and score reports from different AI models using healthcare-specific evaluation rubrics. <a href="llm_evaluation.html" style="color: var(--ki-plum); text-decoration: none; font-weight: 500;">View Dashboard →</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pipeline Section -->
+    <section class="pipeline" id="pipeline">
+        <div class="container">
+            <h2 class="headline-large section-title">The Process Mining Pipeline</h2>
+            <div class="pipeline-container">
+                <div class="pipeline-step">
+                    <div class="step-badge">1</div>
+                    <h3>Data Loading</h3>
+                    <p>Load and validate event logs from CSV files or EHR systems</p>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-badge">2</div>
+                    <h3>Data Preparation</h3>
+                    <p>Clean, transform, and enrich data for process mining</p>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-badge">3</div>
+                    <h3>Process Discovery</h3>
+                    <p>Apply algorithms to discover actual clinical pathways</p>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-badge">4</div>
+                    <h3>AI Analysis</h3>
+                    <p>Generate insights using Large Language Models</p>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-badge">5</div>
+                    <h3>Report Generation</h3>
+                    <p>Create actionable reports for clinical teams</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Examples -->
+    <section class="code-section">
+        <div class="container">
+            <h2 class="headline-large section-title">Quick Start Examples</h2>
+            <div style="text-align: center;">
+                <div class="tab-container">
+                    <button class="tab-button active" onclick="showCode('python')">Python</button>
+                    <button class="tab-button" onclick="showCode('r')">R</button>
+                    <button class="tab-button" onclick="showCode('pipeline')">Full Pipeline</button>
+                </div>
+            </div>
+            
+            <div id="python-code" class="code-content">
+                <pre><code># Install and use HealthProcessAI
+pip install healthprocessai
+
+# Load and analyze healthcare data
+import healthprocessai as hpai
+
+# Step 1: Load clinical event data
+loader = hpai.EventLogLoader("patient_events.csv")
+data = loader.load_and_prepare()
+
+# Step 2: Discover healthcare processes
+miner = hpai.ProcessMiner()
+event_log = miner.create_event_log(data)
+dfg, starts, ends = miner.discover_dfg()
+
+# Step 3: Advanced analytics
+analyzer = hpai.AdvancedProcessAnalyzer(event_log)
+clusters = analyzer.cluster_patient_pathways()
+
+# Step 4: Generate AI-powered insights
+ai = hpai.LLMAnalyzer(api_key)
+report = ai.generate_clinical_report(results)
+
+print(f"✅ Analysis complete! Found {clusters['n_clusters']} patient patterns")</code></pre>
+            </div>
+            
+            <div id="r-code" class="code-content hidden">
+                <pre><code># Process mining in R with bupaR
+library(bupaR)
+library(httr)
+
+# Load event log
+mydata <- read.csv("sepsis_events.csv")
+mydata$timestamp <- as.POSIXct(mydata$timestamp)
+
+# Create event log object
+event_log <- mydata %>%
+  eventlog(case_id="case",
+           activity_id="activity",
+           timestamp="timestamp")
+
+# Discover clinical process
+process_map(event_log, 
+            type_nodes = frequency("relative_case"))
+
+# Generate AI insights with OpenRouter
+query_openrouter(model_name, messages)</code></pre>
+            </div>
+            
+            <div id="pipeline-code" class="code-content hidden">
+                <pre><code># Complete pipeline for sepsis analysis
+def analyze_sepsis_progression(data_path, api_key):
+    """
+    Complete pipeline for sepsis progression analysis.
+    """
+    # Load and prepare clinical data
+    loader = EventLogLoader(data_path)
+    data = loader.load_data()
+    prepared = loader.prepare_data()
+    
+    # Filter sepsis cases for analysis
+    sepsis_cases = loader.filter_by_outcome(sepsis_only=True)
+    
+    # Discover clinical process
+    miner = ProcessMiner()
+    event_log = miner.create_event_log(sepsis_cases)
+    dfg, starts, ends = miner.discover_dfg()
+    variants = miner.discover_variants(top_k=10)
+    metrics = miner.calculate_process_metrics()
+    
+    # AI-powered clinical analysis
+    analyzer = LLMAnalyzer(api_key)
+    prompt = analyzer.create_clinical_prompt(metrics, "sepsis")
+    results = analyzer.analyze_with_multiple_models(prompt)
+    
+    # Generate clinical report
+    report = analyzer.generate_clinical_report(
+        metrics, 
+        results['claude']['content']
+    )
+    
+    return report
+
+# Execute analysis
+report = analyze_sepsis_progression("data.csv", API_KEY)
+print("✅ Clinical report generated successfully!")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tutorials Section -->
+    <section class="tutorials" id="tutorials">
+        <div class="container">
+            <h2 class="headline-large section-title">Interactive Learning Modules</h2>
+            <div class="tutorial-grid">
+                <div class="tutorial-card">
+                    <div class="tutorial-header">
+                        <h3 class="title-large">
+                            <span class="material-icons-round">school</span>
+                            Fundamentals
+                        </h3>
+                        <p>Master the basics of process mining in healthcare</p>
+                    </div>
+                    <div class="tutorial-content">
+                        <ul class="tutorial-list">
+                            <li><span class="material-icons-round check-icon">check_circle</span>What is process mining?</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Event logs and data structures</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Process discovery algorithms</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Healthcare applications</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Hands-on exercises</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tutorial-card">
+                    <div class="tutorial-header">
+                        <h3 class="title-large">
+                            <span class="material-icons-round">biotech</span>
+                            Sepsis Analysis
+                        </h3>
+                        <p>Complete walkthrough of sepsis progression analysis</p>
+                    </div>
+                    <div class="tutorial-content">
+                        <ul class="tutorial-list">
+                            <li><span class="material-icons-round check-icon">check_circle</span>Understanding sepsis pathways</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Data preparation techniques</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Pattern discovery methods</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Risk stratification</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Clinical recommendations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tutorial-card">
+                    <div class="tutorial-header">
+                        <h3 class="title-large">
+                            <span class="material-icons-round">psychology</span>
+                            AI Integration
+                        </h3>
+                        <p>Enhance analysis with Large Language Models</p>
+                    </div>
+                    <div class="tutorial-content">
+                        <ul class="tutorial-list">
+                            <li><span class="material-icons-round check-icon">check_circle</span>OpenRouter API setup</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Prompt engineering</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Multi-model comparison</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Report generation</li>
+                            <li><span class="material-icons-round check-icon">check_circle</span>Best practices</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="use-cases" id="use-cases">
+        <div class="container">
+            <h2 class="headline-large section-title">Clinical Use Cases</h2>
+            <div class="case-grid">
+                <div class="case-card">
+                    <div class="case-number">I</div>
+                    <h3 class="title-large">Infection Progression</h3>
+                    <p class="body-large">Analyze how infections develop and progress to sepsis, focusing on temperature patterns and early warning signs for timely intervention.</p>
+                </div>
+                <div class="case-card">
+                    <div class="case-number">II</div>
+                    <h3 class="title-large">Organ Damage Analysis</h3>
+                    <p class="body-large">Compare process patterns between patients who develop organ damage vs. those who don't, identifying critical divergence points.</p>
+                </div>
+                <div class="case-card">
+                    <div class="case-number">III</div>
+                    <h3 class="title-large">Glomerular Filtration</h3>
+                    <p class="body-large">Study kidney function progression in sepsis patients, tracking GFR changes and predicting acute kidney injury risk.</p>
+                </div>
+                <div class="case-card">
+                    <div class="case-number">IV</div>
+                    <h3 class="title-large">Kidney Disease</h3>
+                    <p class="body-large">Examine the relationship between sepsis episodes and chronic kidney disease development over extended time periods.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3 class="title-large">HealthProcessAI</h3>
+                    <p>A comprehensive framework for process mining in healthcare and life sciences, developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="TUTORIAL.md">Documentation</a></li>
+                        <li><a href="https://github.com/your-repo">Source Code</a></li>
+                        <li><a href="#tutorials">Tutorials</a></li>
+                        <li><a href="#use-cases">Use Cases</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://ki.se">Karolinska Institutet</a></li>
+                        <li><a href="mailto:contact@ki.se">Contact</a></li>
+                        <li><a href="https://github.com">GitHub</a></li>
+                        <li><a href="#">Publications</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Karolinska Institutet. Educational Framework for Process Mining in Healthcare.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching for code examples
+        function showCode(language) {
+            // Hide all code content
+            document.getElementById('python-code').classList.add('hidden');
+            document.getElementById('r-code').classList.add('hidden');
+            document.getElementById('pipeline-code').classList.add('hidden');
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected code and activate button
+            if (language === 'python') {
+                document.getElementById('python-code').classList.remove('hidden');
+                buttons[0].classList.add('active');
+            } else if (language === 'r') {
+                document.getElementById('r-code').classList.remove('hidden');
+                buttons[1].classList.add('active');
+            } else if (language === 'pipeline') {
+                document.getElementById('pipeline-code').classList.remove('hidden');
+                buttons[2].classList.add('active');
+            }
+        }
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Material Design elevation on scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = 'var(--md-elevation-4)';
+            } else {
+                header.style.boxShadow = 'var(--md-elevation-2)';
+            }
+        });
+        
+        // Add ripple effect to buttons
+        document.querySelectorAll('.ripple').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple-effect');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
+</body>
+</html>
