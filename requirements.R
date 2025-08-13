@@ -68,7 +68,9 @@ dev_packages <- c(
   "roxygen2",       # Documentation
   "usethis",        # Workflow utilities
   "styler",         # Code formatting
-  "lintr"           # Code linting
+  "lintr",          # Code linting
+  "R6",             # Object-oriented programming
+  "fs"              # File system operations
 )
 
 # Install all packages

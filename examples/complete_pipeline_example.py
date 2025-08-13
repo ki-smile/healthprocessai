@@ -26,10 +26,10 @@ from pathlib import Path
 import logging
 
 # Import our modular components
-from step1_data_loader import EventLogLoader
-from step2_process_mining import ProcessMiner
-from step3_llm_integration import LLMAnalyzer
-from step4_advanced_analytics import AdvancedProcessAnalyzer
+from core.step1_data_loader import EventLogLoader
+from core.step2_process_mining import ProcessMiner
+from core.step3_llm_integration import LLMAnalyzer
+from core.step4_advanced_analytics import AdvancedProcessAnalyzer
 
 # Configure logging
 logging.basicConfig(
@@ -510,7 +510,7 @@ def main():
     Main function to demonstrate the complete pipeline.
     """
     # Configuration
-    DATA_PATH = "Python/sepsisAgregated_Infection.csv"  # Update with your data path
+    DATA_PATH = "data/sepsisAgregated_Infection.csv"  # Update with your data path
     API_KEY = os.getenv(
         "OPENROUTER_API_KEY"
     )  # Set your API key as environment variable

@@ -68,8 +68,12 @@ cd HealthProcessAI
 conda env create -f environment.yml
 conda activate healthprocessai
 
-# Run Python example
+# IMPORTANT: Run from the repository root directory
+# Run Python example (must be run from root directory)
 python examples/complete_pipeline_example.py
+
+# Or use the -m flag to ensure proper module resolution
+python -m examples.complete_pipeline_example
 
 # Run legacy R example
 Rscript legacy_original/R/openRouter.R
@@ -80,7 +84,11 @@ Rscript legacy_original/R/openRouter.R
 #### Python
 ```bash
 pip install -r requirements.txt
+
+# IMPORTANT: Always run from the repository root directory
 python examples/complete_pipeline_example.py
+
+# Note: If you get import errors, ensure you're in the HealthProcessAI root directory
 ```
 
 #### R
