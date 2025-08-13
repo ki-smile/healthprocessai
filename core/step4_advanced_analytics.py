@@ -18,7 +18,7 @@ Based on methodological approaches from recent healthcare process mining researc
 including techniques for analyzing complex clinical pathways and outcome prediction.
 """
 
-# UNUSED: import pandas as pd
+import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple, Any, Optional
 from datetime import datetime, timedelta
@@ -196,15 +196,26 @@ class AdvancedProcessAnalyzer:
         if n_clusters is None and method == "kmeans":
             n_clusters = self._find_optimal_clusters(scaled_features)
 
-        # Perform clustering
-        if method == "kmeans":
-            clusterer = KMeans(n_clusters=n_clusters, random_state=42)
-            clusters = clusterer.fit_predict(scaled_features)
-        elif method == "dbscan":
-            clusterer = DBSCAN(eps=0.5, min_samples=5)
-            clusters = clusterer.fit_predict(scaled_features)
-        else:
-            raise ValueError(f"Unsupported clustering method: {method}")
+        # Perform clustering with error handling for threadpool issues
+        try:
+            if method == "kmeans":
+                # Try with n_jobs=1 to avoid threadpool issues
+                clusterer = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                clusters = clusterer.fit_predict(scaled_features)
+            elif method == "dbscan":
+                clusterer = DBSCAN(eps=0.5, min_samples=5, n_jobs=1)
+                clusters = clusterer.fit_predict(scaled_features)
+            else:
+                raise ValueError(f"Unsupported clustering method: {method}")
+        except AttributeError as e:
+            # Fallback for threadpool issues
+            logger.warning(f"Clustering failed due to threadpool issue: {e}")
+            logger.info("Using fallback clustering method...")
+            # Simple fallback: assign clusters based on case duration quantiles
+            durations = feature_matrix[:, 0]  # First feature is usually duration
+            clusters = pd.qcut(durations, q=n_clusters if n_clusters else 3, 
+                              labels=False, duplicates='drop')
+            method = f"{method}_fallback"
 
         # Calculate cluster quality metrics
         if len(set(clusters)) > 1:
