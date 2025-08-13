@@ -22,7 +22,7 @@
 # - Python json -> R jsonlite
 # - Python pathlib -> R fs package
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries
@@ -276,7 +276,7 @@ that could potentially improve patient outcomes.
 **Generated:** {format(Sys.time(), "%Y-%m-%d %H:%M:%S")}  
 **Framework:** HealthProcessAI - Process Mining Framework for Healthcare  
 **Language:** R Implementation  
-**Developed at:** SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet
+**Developed at:** SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet
 
 ---
 

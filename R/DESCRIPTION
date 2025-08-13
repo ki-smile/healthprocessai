@@ -1,0 +1,75 @@
+Package: HealthProcessAI
+Type: Package
+Title: Healthcare Process Mining with LLM Integration
+Version: 1.0.0
+Date: 2024-08-13
+Authors@R: c(
+    person("Farhad", "Abtahi", email = "farhad.abtahi@ki.se", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0000-0000-0000")),
+    person("Eduardo", "Illueca Fernandez", email = "eduardo.illueca@ki.se", role = "aut"),
+    person("Kaile", "Chen", email = "kaile.chen@ki.se", role = "aut")
+)
+Description: A comprehensive R framework for healthcare process mining with integrated 
+    Large Language Model (LLM) capabilities. Provides tools for clinical pathway 
+    discovery, patient journey analysis, sepsis progression modeling, and AI-powered 
+    clinical insight generation. Built on the bupaR ecosystem with modern R6 class 
+    architecture and httr2 for API integration. Designed for healthcare researchers, 
+    clinical informaticists, and process improvement specialists.
+License: MIT + file LICENSE
+URL: https://github.com/ki-smile/HealthProcessAI
+BugReports: https://github.com/ki-smile/HealthProcessAI/issues
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.1
+Depends: 
+    R (>= 4.1.0)
+Imports:
+    tidyverse (>= 2.0.0),
+    dplyr (>= 1.1.0),
+    tidyr (>= 1.3.0),
+    readr (>= 2.1.0),
+    lubridate (>= 1.9.0),
+    stringr (>= 1.5.0),
+    glue (>= 1.6.0),
+    jsonlite (>= 1.8.0),
+    R6 (>= 2.5.0),
+    httr2 (>= 0.2.0),
+    cluster (>= 2.1.0),
+    factoextra (>= 1.0.0),
+    kableExtra (>= 1.3.0)
+Suggests:
+    bupaR (>= 0.5.0),
+    edeaR (>= 0.9.0),
+    processmapR (>= 0.5.0),
+    petrinetR (>= 0.3.0),
+    eventdataR (>= 0.3.0),
+    rmarkdown (>= 2.20),
+    knitr (>= 1.40),
+    DT (>= 0.20),
+    testthat (>= 3.0.0),
+    ggplot2 (>= 3.4.0),
+    plotly (>= 4.10.0)
+VignetteBuilder: knitr
+Collate:
+    'step1_data_loader.R'
+    'step2_process_mining.R'
+    'step3_llm_integration.R'
+    'step4_advanced_analytics.R'
+    'step5_orchestrator.R'
+    'report_generator.R'
+    'utils.R'
+    'data.R'
+    'package.R'
+SystemRequirements: 
+    OpenRouter API key for LLM features (optional),
+    Graphviz for process map visualization (optional)
+Keywords: 
+    healthcare,
+    process-mining,
+    clinical-pathways,
+    sepsis-analysis,
+    machine-learning,
+    artificial-intelligence,
+    medical-informatics,
+    patient-journey,
+    clinical-analytics

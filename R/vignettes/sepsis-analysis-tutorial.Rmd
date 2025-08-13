@@ -1,0 +1,560 @@
+---
+title: "Sepsis Analysis with HealthProcessAI"
+author: "SMAILE Lab, Karolinska Institutet"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_width: 7
+    fig_height: 5
+vignette: >
+  %\VignetteIndexEntry{Sepsis Analysis with HealthProcessAI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+This tutorial demonstrates how to use HealthProcessAI for comprehensive sepsis analysis, from raw clinical data to AI-powered insights and actionable recommendations. We'll walk through a complete sepsis progression analysis workflow using the R implementation.
+
+## Background
+
+Sepsis is a life-threatening condition that requires rapid identification and treatment. Process mining can help healthcare teams understand:
+
+- **Patient journey patterns** leading to sepsis
+- **Critical intervention points** and timing
+- **Resource bottlenecks** that delay care
+- **Risk factors** for sepsis development
+- **Quality improvement opportunities**
+
+## Data Setup
+
+```{r message=FALSE}
+# Load required libraries
+library(tidyverse)
+library(lubridate)
+library(R6)
+
+# Source HealthProcessAI modules
+# Note: In actual package installation, these would be loaded automatically
+source("../core/step1_data_loader.R")
+source("../core/step2_process_mining.R") 
+source("../core/step3_llm_integration.R")
+source("../core/step4_advanced_analytics.R")
+source("../core/step5_orchestrator.R")
+source("../core/report_generator.R")
+```
+
+### Creating Sample Sepsis Data
+
+For this tutorial, we'll create realistic sepsis progression data:
+
+```{r}
+# Create comprehensive sepsis dataset
+create_realistic_sepsis_data <- function(n_patients = 100, sepsis_rate = 0.25) {
+  set.seed(123)  # For reproducibility
+  
+  sepsis_patients <- sample(1:n_patients, size = floor(n_patients * sepsis_rate))
+  all_events <- list()
+  
+  # Define progression pathways
+  normal_pathway <- c(
+    "ED_Arrival", "Triage", "Initial_Assessment", "Vitals_Normal",
+    "Lab_Orders", "Lab_Results_Normal", "Physician_Evaluation",
+    "Treatment_Plan", "Discharge_Planning", "Discharge"
+  )
+  
+  sepsis_pathway <- c(
+    "ED_Arrival", "Triage", "Initial_Assessment", "Vitals_Concerning",
+    "Urgent_Lab_Orders", "Lab_Results_Abnormal", "SIRS_Criteria_Met",
+    "Infection_Suspected", "Blood_Cultures", "Antibiotic_Orders",
+    "IV_Access", "Fluid_Resuscitation", "ICU_Consultation",
+    "Sepsis_Protocol_Initiated", "Lactate_Elevated", "Vasopressor_Consideration",
+    "ICU_Transfer", "Sepsis_Confirmed", "Organ_Support", "Recovery_Phase",
+    "Step_Down", "Discharge"
+  )
+  
+  for (i in 1:n_patients) {
+    patient_id <- sprintf("Patient_%03d", i)
+    is_sepsis <- i %in% sepsis_patients
+    
+    # Choose pathway and add some variation
+    if (is_sepsis) {
+      base_activities <- sepsis_pathway
+      # Add complications for some patients
+      if (runif(1) < 0.3) {
+        insert_pos <- which(base_activities == "ICU_Transfer")
+        base_activities <- append(base_activities, "Mechanical_Ventilation", insert_pos)
+      }
+      if (runif(1) < 0.2) {
+        insert_pos <- which(base_activities == "Organ_Support")
+        base_activities <- append(base_activities, "Dialysis_Initiated", insert_pos)
+      }
+    } else {
+      base_activities <- normal_pathway
+      # Some normal patients might have extended stays
+      if (runif(1) < 0.15) {
+        insert_pos <- which(base_activities == "Treatment_Plan")
+        base_activities <- append(base_activities, c("Extended_Observation", "Specialist_Consult"), insert_pos)
+      }
+    }
+    
+    # Generate realistic timestamps
+    start_time <- as.POSIXct("2024-01-01") + days(sample(0:365, 1)) + hours(sample(0:23, 1))
+    
+    # Create time intervals that reflect clinical reality
+    if (is_sepsis) {
+      # Sepsis patients have more urgent, frequent activities
+      base_intervals <- c(0, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 6, 8, 12, 16, 20, 24, 28, 36, 48, 72, 96, 120, 144)
+      intervals <- base_intervals[1:min(length(base_activities), length(base_intervals))]
+      if (length(intervals) < length(base_activities)) {
+        additional <- seq(from = max(intervals), 
+                         length.out = length(base_activities) - length(intervals) + 1,
+                         by = 12)[-1]
+        intervals <- c(intervals, additional)
+      }
+    } else {
+      # Normal patients have more spaced activities
+      intervals <- cumsum(rexp(length(base_activities), rate = 1/4))
+    }
+    
+    timestamps <- start_time + hours(intervals[1:length(base_activities)])
+    
+    # Assign realistic resources
+    resources <- character(length(base_activities))
+    for (j in seq_along(base_activities)) {
+      activity <- base_activities[j]
+      resources[j] <- case_when(
+        str_detect(activity, "ED_|Triage") ~ "Emergency_Department",
+        str_detect(activity, "Lab_|Blood_") ~ "Laboratory",
+        str_detect(activity, "ICU|Vasopressor|Mechanical") ~ "ICU",
+        str_detect(activity, "Vitals|Assessment") ~ "Nursing",
+        str_detect(activity, "Physician|Specialist") ~ "Physician",
+        str_detect(activity, "Discharge") ~ "Discharge_Planning",
+        TRUE ~ sample(c("Nursing", "Physician", "Support_Staff"), 1)
+      )
+    }
+    
+    # Create patient event log
+    patient_events <- tibble(
+      case = patient_id,
+      activity = base_activities,
+      timestamp = timestamps,
+      resource = resources,
+      sepsis_label = as.integer(is_sepsis),
+      patient_age = sample(18:95, 1),
+      gender = sample(c("M", "F"), 1),
+      comorbidities = sample(0:3, 1)
+    )
+    
+    all_events <- append(all_events, list(patient_events))
+  }
+  
+  # Combine all patients
+  combined_data <- bind_rows(all_events) %>%
+    arrange(case, timestamp) %>%
+    mutate(
+      lifecycle = "complete",
+      activity_instance_id = row_number()
+    )
+  
+  return(combined_data)
+}
+
+# Generate our dataset
+sepsis_data <- create_realistic_sepsis_data(n_patients = 80, sepsis_rate = 0.3)
+
+# Display basic information
+cat("📊 Dataset Overview:\n")
+cat(sprintf("  • Patients: %d\n", n_distinct(sepsis_data$case)))
+cat(sprintf("  • Events: %d\n", nrow(sepsis_data)))
+cat(sprintf("  • Sepsis cases: %d (%.1f%%)\n", 
+            sum(sepsis_data$sepsis_label), 
+            mean(sepsis_data$sepsis_label) * 100))
+cat(sprintf("  • Activities: %d unique\n", n_distinct(sepsis_data$activity)))
+```
+
+## Step 1: Data Loading and Validation
+
+```{r}
+# Initialize data loader
+loader <- EventLogLoader$new()
+
+# Load and validate the data
+event_log <- loader$load_from_data_frame(sepsis_data)
+
+# Validate data structure
+is_valid <- loader$validate_event_log(event_log)
+cat(sprintf("✅ Data validation: %s\n", ifelse(is_valid, "PASSED", "FAILED")))
+
+# Get comprehensive statistics
+stats <- loader$get_basic_statistics(event_log)
+print(stats)
+```
+
+### Data Quality Assessment
+
+```{r}
+# Analyze data quality
+quality_metrics <- event_log %>%
+  summarise(
+    completeness = mean(!is.na(activity)) * 100,
+    timestamp_coverage = mean(!is.na(timestamp)) * 100,
+    resource_coverage = mean(!is.na(resource)) * 100,
+    avg_events_per_case = n() / n_distinct(case),
+    date_range_days = as.numeric(difftime(max(timestamp), min(timestamp), units = "days"))
+  )
+
+cat("📋 Data Quality Metrics:\n")
+cat(sprintf("  • Activity completeness: %.1f%%\n", quality_metrics$completeness))
+cat(sprintf("  • Timestamp coverage: %.1f%%\n", quality_metrics$timestamp_coverage))
+cat(sprintf("  • Resource coverage: %.1f%%\n", quality_metrics$resource_coverage))
+cat(sprintf("  • Avg events per patient: %.1f\n", quality_metrics$avg_events_per_case))
+cat(sprintf("  • Data spans: %.0f days\n", quality_metrics$date_range_days))
+```
+
+## Step 2: Process Mining Analysis
+
+```{r}
+# Initialize process miner
+miner <- ProcessMiner$new()
+
+# Calculate comprehensive performance metrics
+if (requireNamespace("bupaR", quietly = TRUE)) {
+  # Convert to bupaR format
+  bupar_log <- loader$convert_to_bupar(event_log)
+  
+  # Discover process patterns
+  metrics <- miner$calculate_performance_metrics(bupar_log)
+  cat("🔍 Process Mining Results:\n")
+  cat(sprintf("  • Cases: %d\n", metrics$n_cases))
+  cat(sprintf("  • Events: %d\n", metrics$n_events))
+  cat(sprintf("  • Activities: %d\n", metrics$n_activities))
+  cat(sprintf("  • Avg case duration: %.1f hours\n", metrics$avg_case_duration))
+  cat(sprintf("  • Process variants: %d\n", metrics$n_variants))
+  
+  # Analyze bottlenecks
+  bottlenecks <- miner$identify_bottlenecks(bupar_log, threshold_percentile = 75)
+  cat("\n🚨 Process Bottlenecks:\n")
+  print(head(bottlenecks, 5))
+  
+  # Process variants analysis
+  variants <- miner$analyze_process_variants(bupar_log, top_n = 5)
+  cat("\n🔄 Top Process Variants:\n")
+  print(variants)
+  
+} else {
+  cat("⚠️ bupaR not available. Install with: install.packages('bupaR')\n")
+  
+  # Fallback analysis without bupaR
+  metrics <- list(
+    n_cases = n_distinct(event_log$case),
+    n_events = nrow(event_log),
+    n_activities = n_distinct(event_log$activity)
+  )
+}
+```
+
+### Sepsis vs Non-Sepsis Comparison
+
+```{r}
+# Compare sepsis and non-sepsis pathways
+pathway_comparison <- event_log %>%
+  group_by(case, sepsis_label) %>%
+  summarise(
+    pathway = paste(activity, collapse = " → "),
+    duration_hours = as.numeric(difftime(max(timestamp), min(timestamp), units = "hours")),
+    n_activities = n(),
+    resource_types = n_distinct(resource),
+    .groups = "drop"
+  )
+
+comparison_stats <- pathway_comparison %>%
+  group_by(sepsis_label) %>%
+  summarise(
+    n_patients = n(),
+    avg_duration = mean(duration_hours, na.rm = TRUE),
+    median_duration = median(duration_hours, na.rm = TRUE),
+    avg_activities = mean(n_activities),
+    avg_resources = mean(resource_types),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    sepsis_status = ifelse(sepsis_label == 1, "Sepsis", "Non-Sepsis")
+  )
+
+cat("📊 Sepsis vs Non-Sepsis Comparison:\n")
+print(comparison_stats %>% select(-sepsis_label))
+```
+
+## Step 3: Advanced Analytics
+
+```{r}
+# Initialize advanced analyzer
+advanced <- AdvancedProcessAnalyzer$new(event_log)
+
+# Patient pathway clustering
+cat("🔬 Patient Pathway Clustering:\n")
+clustering_results <- advanced$cluster_patient_pathways(n_clusters = 4, method = "kmeans")
+
+cat(sprintf("  • Identified %d distinct patient clusters\n", 
+           length(unique(clustering_results$clusters$cluster))))
+
+# Display cluster characteristics
+cluster_summary <- clustering_results$clusters %>%
+  left_join(pathway_comparison %>% select(case, sepsis_label, duration_hours, n_activities), 
+           by = "case") %>%
+  group_by(cluster) %>%
+  summarise(
+    n_patients = n(),
+    sepsis_rate = mean(sepsis_label, na.rm = TRUE),
+    avg_duration = mean(duration_hours, na.rm = TRUE),
+    avg_activities = mean(n_activities, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+cat("\n📈 Cluster Characteristics:\n")
+print(cluster_summary)
+```
+
+### Clinical KPIs
+
+```{r}
+# Calculate clinical key performance indicators
+kpis <- advanced$calculate_clinical_kpis()
+cat("📊 Clinical KPIs:\n")
+cat(sprintf("  • Average length of stay: %.1f hours\n", kpis$avg_los))
+cat(sprintf("  • Case completion rate: %.1f%%\n", kpis$completion_rate * 100))
+cat(sprintf("  • Activity efficiency: %.1f%%\n", kpis$activity_efficiency * 100))
+cat(sprintf("  • Resource utilization: %.1f%%\n", kpis$resource_utilization * 100))
+```
+
+### Predictive Risk Modeling
+
+```{r}
+# Predictive monitoring for sepsis risk
+predictions <- advanced$predictive_monitoring(
+  target_activity = "Sepsis_Confirmed",
+  threshold = 0.4
+)
+
+risk_summary <- predictions %>%
+  summarise(
+    total_cases = n(),
+    high_risk_cases = sum(prediction == "High Risk", na.rm = TRUE),
+    avg_risk_score = mean(risk_score, na.rm = TRUE),
+    risk_accuracy = if(sum(!is.na(risk_score)) > 0) {
+      # Simple accuracy check (this would need actual outcomes in real data)
+      "Available with outcome data"
+    } else {
+      "N/A"
+    }
+  )
+
+cat("🎯 Predictive Risk Analysis:\n")
+cat(sprintf("  • Total cases analyzed: %d\n", risk_summary$total_cases))
+cat(sprintf("  • High-risk predictions: %d\n", risk_summary$high_risk_cases))
+cat(sprintf("  • Average risk score: %.3f\n", risk_summary$avg_risk_score))
+```
+
+## Step 4: LLM-Powered Clinical Insights
+
+```{r eval=FALSE}
+# Note: This section requires an OpenRouter API key
+api_key <- Sys.getenv("OPENROUTER_API_KEY")
+
+if (nchar(api_key) > 0) {
+  # Initialize LLM analyzer
+  llm <- LLMAnalyzer$new(api_key = api_key)
+  
+  # Prepare comprehensive analysis summary
+  analysis_summary <- list(
+    patient_metrics = list(
+      total_patients = n_distinct(event_log$case),
+      sepsis_cases = sum(event_log$sepsis_label > 0),
+      sepsis_rate = mean(event_log$sepsis_label)
+    ),
+    process_metrics = metrics,
+    bottlenecks = head(bottlenecks, 3),
+    clusters = clustering_results$summary,
+    kpis = kpis,
+    risk_analysis = risk_summary
+  )
+  
+  # Generate clinical insights
+  cat("🤖 Generating AI-powered clinical insights...\n")
+  
+  clinical_response <- llm$generate_clinical_report(
+    process_data = analysis_summary,
+    model = "anthropic/claude-3.5-sonnet"
+  )
+  
+  cat("📝 Clinical Insights:\n")
+  cat(clinical_response$content)
+  
+  # Multi-model analysis for consensus
+  multi_model_analysis <- llm$analyze_with_multiple_models(
+    process_results = analysis_summary,
+    models = c("anthropic/claude-3.5-sonnet", "openai/gpt-4o"),
+    clinical_context = "sepsis"
+  )
+  
+  cat("\n🎭 Multi-Model Analysis Complete\n")
+  cat(sprintf("  • Models consulted: %d\n", length(multi_model_analysis)))
+  
+} else {
+  cat("ℹ️ Set OPENROUTER_API_KEY environment variable to enable LLM analysis\n")
+}
+```
+
+## Step 5: Comprehensive Reporting
+
+```{r}
+# Initialize report generator
+generator <- ReportGenerator$new()
+
+# Prepare comprehensive report data
+report_data <- list(
+  title = "Sepsis Patient Journey Analysis",
+  subtitle = "Process Mining and AI-Powered Clinical Insights",
+  date = Sys.Date(),
+  author = "Clinical Process Mining Team",
+  organization = "Healthcare Analytics Department",
+  
+  executive_summary = sprintf(
+    "Analysis of %d sepsis cases reveals distinct progression patterns with %.1f%% sepsis rate. Key findings include identification of %d patient clusters and critical bottlenecks in %s processes.",
+    n_distinct(event_log$case),
+    mean(event_log$sepsis_label) * 100,
+    length(unique(clustering_results$clusters$cluster)),
+    nrow(bottlenecks)
+  ),
+  
+  methodology = list(
+    data_source = "Electronic Health Records",
+    analysis_period = sprintf("%s to %s", min(event_log$timestamp), max(event_log$timestamp)),
+    patients_analyzed = n_distinct(event_log$case),
+    process_mining_approach = "bupaR-based discovery with advanced analytics",
+    ai_models = "Multi-model LLM analysis via OpenRouter"
+  ),
+  
+  key_findings = list(
+    process_variants = ifelse(exists("variants"), nrow(variants), "Analysis pending"),
+    bottlenecks_identified = nrow(bottlenecks),
+    risk_factors = list(
+      "Delayed antibiotic administration",
+      "Laboratory processing delays", 
+      "ICU bed availability",
+      "Sepsis protocol adherence"
+    ),
+    patient_clusters = length(unique(clustering_results$clusters$cluster))
+  ),
+  
+  clinical_metrics = list(
+    avg_los = kpis$avg_los,
+    completion_rate = kpis$completion_rate,
+    efficiency = kpis$activity_efficiency,
+    resource_utilization = kpis$resource_utilization
+  ),
+  
+  recommendations = list(
+    immediate = c(
+      "Implement automated sepsis screening alerts",
+      "Reduce laboratory turnaround time",
+      "Standardize sepsis response protocols"
+    ),
+    short_term = c(
+      "Develop predictive risk models",
+      "Optimize ICU resource allocation",
+      "Enhance staff sepsis training"
+    ),
+    long_term = c(
+      "Integrate AI-powered decision support",
+      "Establish continuous process monitoring",
+      "Create sepsis quality dashboards"
+    )
+  )
+)
+
+# Generate markdown report
+markdown_report <- generator$generate_markdown_report(report_data, include_visualizations = FALSE)
+
+# Display report preview
+cat("📄 Report Preview (first 500 characters):\n")
+cat(paste0(substr(markdown_report, 1, 500), "...\n"))
+
+# In a real scenario, you would save the report
+# writeLines(markdown_report, "sepsis_analysis_report.md")
+```
+
+## Key Insights and Clinical Implications
+
+### Process Optimization Opportunities
+
+Based on our analysis, several key optimization opportunities emerge:
+
+1. **Early Detection Enhancement**
+   - Implement automated vital sign monitoring
+   - Create predictive risk algorithms
+   - Establish rapid response triggers
+
+2. **Resource Allocation Improvements**  
+   - Optimize laboratory processing workflows
+   - Improve ICU bed management
+   - Enhance staff allocation during high-risk periods
+
+3. **Protocol Standardization**
+   - Develop consistent sepsis response protocols
+   - Create decision support tools
+   - Implement quality monitoring systems
+
+### Clinical Decision Support
+
+The analysis reveals that:
+
+- **Patient clustering** identifies distinct risk profiles requiring different care approaches
+- **Bottleneck analysis** pinpoints specific process improvements with highest impact  
+- **Predictive modeling** enables proactive intervention before sepsis development
+- **Resource optimization** can reduce delays in critical care delivery
+
+## Next Steps and Implementation
+
+### Immediate Actions
+1. **Validate findings** with clinical experts and domain specialists
+2. **Test predictive models** with historical data and outcomes
+3. **Pilot process improvements** in selected departments
+4. **Establish monitoring systems** for ongoing quality assessment
+
+### Future Enhancements
+1. **Real-time integration** with EHR systems
+2. **Expanded predictive capabilities** using machine learning
+3. **Multi-site validation** across different healthcare systems
+4. **Patient outcome correlation** with process improvements
+
+## Conclusion
+
+This tutorial demonstrates the power of combining process mining with AI for healthcare analytics. The HealthProcessAI framework provides:
+
+- **Comprehensive process discovery** revealing hidden patterns in care delivery
+- **Advanced analytics** for patient stratification and risk prediction  
+- **AI-powered insights** for clinical decision support
+- **Actionable recommendations** for quality improvement
+
+The R implementation offers seamless integration with existing healthcare analytics workflows while providing the flexibility to customize analysis for specific clinical contexts.
+
+---
+
+*For more information about HealthProcessAI, visit: https://github.com/ki-smile/HealthProcessAI*
+
+*SMAILE Lab: https://smile.ki.se*

@@ -16,7 +16,7 @@
 #
 # Perfect for learning the end-to-end workflow of healthcare process mining.
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries

@@ -23,7 +23,7 @@
 # - Python pandas -> R tidyverse/dplyr
 # - Python pm4py conformance -> R custom implementation
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries

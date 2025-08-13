@@ -179,4 +179,4 @@ Open `notebooks/HealthProcessAI_Python_Colab.ipynb` in Google Colab for instant 
 
 ---
 
-*Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet*
+*Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet*

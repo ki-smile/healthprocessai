@@ -9,7 +9,7 @@ focusing on sepsis progression patterns.
 
 Created on Mon Jul 14 14:25:27 2025
 @author: edillu
-Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet
+Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet
 
 LEARNING OBJECTIVES:
 1. Understand how to convert healthcare event logs to PM4PY format

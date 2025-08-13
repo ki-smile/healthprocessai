@@ -4,7 +4,7 @@
 # This file initializes the HealthProcessAI R core modules for process mining
 # and LLM integration in healthcare data analysis.
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries for the core package

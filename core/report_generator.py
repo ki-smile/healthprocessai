@@ -176,7 +176,7 @@ class ReportGenerator:
 
 **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Framework:** HealthProcessAI - Process Mining Framework for Healthcare
-**Developed at:** SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet
+**Developed at:** SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet
 
 ---
 

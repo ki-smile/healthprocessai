@@ -1,0 +1,376 @@
+---
+title: "Getting Started with HealthProcessAI"
+author: "SMAILE Lab, Karolinska Institutet"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Getting Started with HealthProcessAI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Introduction
+
+HealthProcessAI is a comprehensive R framework for healthcare process mining with integrated Large Language Model (LLM) capabilities. This vignette provides a step-by-step guide to get you started with analyzing clinical pathways, patient journeys, and healthcare processes.
+
+## Installation
+
+```{r eval=FALSE}
+# Install from GitHub (when public)
+devtools::install_github("ki-smile/HealthProcessAI", subdir = "R")
+
+# Or install locally
+devtools::install_local("path/to/HealthProcessAI/R")
+
+# Load the package
+library(HealthProcessAI)
+```
+
+```{r}
+# For this vignette, we'll load required packages
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(R6)
+  library(lubridate)
+})
+
+# Source the modules (in actual package installation, this wouldn't be needed)
+# source("../core/step1_data_loader.R")
+# source("../core/step2_process_mining.R")
+# source("../core/step3_llm_integration.R")
+```
+
+## Quick Start: 5-Step Pipeline
+
+HealthProcessAI implements a modular 5-step pipeline for healthcare process mining:
+
+1. **Data Loading** - Load and validate healthcare event logs
+2. **Process Mining** - Discover clinical pathways
+3. **LLM Integration** - Generate AI-powered insights
+4. **Advanced Analytics** - Clustering and predictive analysis
+5. **Report Orchestration** - Multi-model consensus building
+
+### Step 1: Load Your Data
+
+```{r}
+# Create sample sepsis data for demonstration
+sample_data <- create_sample_sepsis_data(n_patients = 20, sepsis_rate = 0.3)
+
+# Initialize the data loader
+loader <- EventLogLoader$new()
+
+# Load the data
+event_log <- loader$load_from_data_frame(sample_data)
+
+# Get basic statistics
+stats <- loader$get_basic_statistics(event_log)
+print(stats)
+```
+
+### Step 2: Process Mining Analysis
+
+```{r eval=FALSE}
+# Initialize process miner
+miner <- ProcessMiner$new()
+
+# Discover process patterns (requires bupaR)
+if (requireNamespace("bupaR", quietly = TRUE)) {
+  # Convert to bupaR format
+  bupar_log <- loader$convert_to_bupar(event_log)
+  
+  # Discover directly-follows graph
+  dfg <- miner$discover_dfg(bupar_log, type = "frequency")
+  
+  # Calculate performance metrics
+  metrics <- miner$calculate_performance_metrics(bupar_log)
+  print(metrics)
+  
+  # Identify bottlenecks
+  bottlenecks <- miner$identify_bottlenecks(bupar_log)
+  head(bottlenecks)
+}
+```
+
+### Step 3: LLM Integration (Optional)
+
+```{r eval=FALSE}
+# Initialize LLM analyzer (requires API key)
+api_key <- Sys.getenv("OPENROUTER_API_KEY")
+
+if (nchar(api_key) > 0) {
+  llm_analyzer <- LLMAnalyzer$new(api_key = api_key)
+  
+  # Query a single model
+  response <- llm_analyzer$query_model(
+    model = "anthropic/claude-3.5-sonnet",
+    prompt = "Analyze this sepsis progression pattern for clinical insights...",
+    max_tokens = 500
+  )
+  
+  cat(response$content)
+  
+  # Multi-model analysis
+  multi_analysis <- llm_analyzer$analyze_with_multiple_models(
+    process_results = metrics,
+    models = c("anthropic/claude-3.5-sonnet", "openai/gpt-4o"),
+    clinical_context = "sepsis"
+  )
+} else {
+  message("Set OPENROUTER_API_KEY environment variable to enable LLM features")
+}
+```
+
+### Step 4: Advanced Analytics
+
+```{r}
+# Initialize advanced analyzer
+advanced_analyzer <- AdvancedProcessAnalyzer$new(event_log)
+
+# Patient pathway clustering
+clustering_results <- advanced_analyzer$cluster_patient_pathways(n_clusters = 3)
+print(clustering_results$summary)
+
+# Calculate clinical KPIs
+kpis <- advanced_analyzer$calculate_clinical_kpis()
+print(kpis)
+
+# Predictive monitoring
+predictions <- advanced_analyzer$predictive_monitoring(
+  target_activity = "Sepsis_Confirmed",
+  threshold = 0.3
+)
+head(predictions)
+```
+
+### Step 5: Report Generation
+
+```{r eval=FALSE}
+# Initialize report generator
+generator <- ReportGenerator$new()
+
+# Prepare comprehensive report data
+report_data <- list(
+  title = "Sepsis Patient Journey Analysis",
+  date = Sys.Date(),
+  author = "Clinical Analytics Team",
+  executive_summary = "Analysis of sepsis progression patterns reveals key intervention opportunities.",
+  
+  process_analysis = list(
+    n_cases = stats$n_cases,
+    n_activities = stats$n_activities,
+    avg_case_duration = stats$avg_case_duration,
+    bottlenecks = bottlenecks
+  ),
+  
+  clinical_insights = list(
+    key_findings = c(
+      "Three distinct sepsis progression pathways identified",
+      "Early vital sign deterioration predicts sepsis onset"
+    ),
+    recommendations = c(
+      "Implement automated early warning system",
+      "Reduce laboratory processing delays"
+    )
+  ),
+  
+  advanced_analytics = clustering_results,
+  kpis = kpis
+)
+
+# Generate markdown report
+markdown_report <- generator$generate_markdown_report(report_data)
+
+# Save to file
+writeLines(markdown_report, "sepsis_analysis_report.md")
+
+# Generate HTML report (requires rmarkdown)
+if (requireNamespace("rmarkdown", quietly = TRUE)) {
+  html_result <- generator$generate_html_report(
+    data = report_data,
+    output_file = "sepsis_analysis_report.html"
+  )
+}
+```
+
+## Working with Real Data
+
+### Loading CSV Files
+
+```{r eval=FALSE}
+# Load real sepsis data
+loader <- EventLogLoader$new()
+
+# Standard format
+event_log <- loader$load_from_csv("path/to/sepsis_data.csv")
+
+# Custom column mapping
+event_log <- loader$load_from_csv(
+  "path/to/patient_data.csv",
+  case_col = "patient_id",
+  activity_col = "event_name",
+  timestamp_col = "event_time", 
+  resource_col = "department"
+)
+```
+
+### Data Validation and Preprocessing
+
+```{r}
+# Validate event log structure
+is_valid <- loader$validate_event_log(event_log)
+print(paste("Data is valid:", is_valid))
+
+# Apply filters
+filtered_log <- loader$apply_filters(
+  event_log,
+  case_filter = c("Patient_001", "Patient_005", "Patient_010"),
+  activity_filter = c("Admission", "Lab_Test_Abnormal", "Sepsis_Confirmed")
+)
+
+print(paste("Filtered to", nrow(filtered_log), "events"))
+```
+
+## Data Transformation Examples
+
+### PhysioNet-Style Data
+
+```{r eval=FALSE}
+# Transform raw clinical measurements to event logs
+transformer <- HealthcareDataTransformer$new()
+
+# Create sample PhysioNet-style data
+raw_data <- transformer$create_physionet_style_data(n_patients = 10)
+
+# Transform to event log
+transformed_log <- transformer$transform_to_event_log(raw_data)
+
+# Analyze transformation results
+analysis <- transformer$analyze_event_log(transformed_log)
+print(analysis)
+```
+
+### Organ Failure Progression
+
+```{r eval=FALSE}
+# Analyze organ failure patterns
+organ_transformer <- PhysioNetToOrganTransformer$new()
+
+# Create sample patients with organ dysfunction
+sample_patients <- create_sample_patients()
+
+# Transform to organ failure events
+organ_log <- organ_transformer$create_aggregated_organ_log(sample_patients)
+
+# Analyze patterns
+patterns <- organ_transformer$analyze_organ_patterns(organ_log)
+print(patterns)
+```
+
+## Visualization and Analysis
+
+### Basic Process Statistics
+
+```{r}
+# Activity frequency analysis
+activity_freq <- event_log %>%
+  count(activity, sort = TRUE) %>%
+  head(10)
+
+print(activity_freq)
+
+# Case duration analysis  
+case_durations <- event_log %>%
+  group_by(case) %>%
+  summarise(
+    duration_hours = as.numeric(difftime(max(timestamp), min(timestamp), units = "hours")),
+    n_activities = n(),
+    .groups = "drop"
+  )
+
+summary(case_durations)
+```
+
+### Sepsis Analysis
+
+```{r}
+# Analyze sepsis vs non-sepsis pathways
+sepsis_analysis <- event_log %>%
+  group_by(case, sepsis_label) %>%
+  summarise(
+    pathway = paste(activity, collapse = " -> "),
+    duration_hours = as.numeric(difftime(max(timestamp), min(timestamp), units = "hours")),
+    n_activities = n(),
+    .groups = "drop"
+  )
+
+# Compare sepsis vs non-sepsis cases
+sepsis_comparison <- sepsis_analysis %>%
+  group_by(sepsis_label) %>%
+  summarise(
+    n_cases = n(),
+    avg_duration = mean(duration_hours, na.rm = TRUE),
+    avg_activities = mean(n_activities, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(sepsis_comparison)
+```
+
+## Best Practices
+
+### Data Preparation
+
+1. **Validate your data** using `validate_event_log()` before analysis
+2. **Handle missing values** appropriately for your clinical context
+3. **Standardize activity names** for consistent analysis
+4. **Check timestamp formats** and timezone consistency
+
+### Process Mining
+
+1. **Start simple** with basic statistics before advanced analysis
+2. **Validate clinical relevance** of discovered patterns
+3. **Consider clinical context** when interpreting bottlenecks
+4. **Use domain expertise** to guide analysis parameters
+
+### LLM Integration
+
+1. **Set up API keys** securely using environment variables
+2. **Start with single models** before multi-model analysis
+3. **Validate AI insights** with clinical experts
+4. **Monitor API costs** and usage
+
+### Reporting
+
+1. **Tailor reports** to your audience (clinical vs administrative)
+2. **Include visualizations** to support findings
+3. **Provide actionable recommendations**
+4. **Document methodology** and assumptions
+
+## Next Steps
+
+- Explore the full API documentation for advanced features
+- Try the complete pipeline examples in `R/examples/`
+- Set up LLM integration with your OpenRouter API key
+- Customize analysis parameters for your specific use case
+- Integrate with your existing clinical data systems
+
+## Support and Resources
+
+- **GitHub Repository**: https://github.com/ki-smile/HealthProcessAI
+- **SMAILE Lab**: https://smile.ki.se  
+- **bupaR Documentation**: https://www.bupar.net/
+- **OpenRouter API**: https://openrouter.ai/docs
+
+For questions and support, please open an issue on the GitHub repository.

@@ -1,0 +1,504 @@
+---
+title: "Clinical Pathway Discovery with HealthProcessAI"
+author: "SMAILE Lab, Karolinska Institutet"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    df_print: paged
+  pdf_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Clinical Pathway Discovery with HealthProcessAI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 150
+)
+```
+
+# Introduction
+
+This vignette demonstrates how to use HealthProcessAI's R implementation for discovering and analyzing clinical pathways. We'll explore how to:
+
+- Load and prepare clinical event data
+- Discover process models using bupaR
+- Identify pathway variants and bottlenecks
+- Analyze patient flow patterns
+- Generate actionable clinical insights
+
+## Background
+
+Clinical pathway discovery uses process mining techniques to analyze healthcare event logs and uncover:
+
+- **Standard care pathways** - Common sequences of clinical activities
+- **Pathway variants** - Alternative routes through care processes
+- **Process bottlenecks** - Points where delays frequently occur
+- **Resource utilization** - How clinical resources are used across pathways
+- **Quality indicators** - Metrics for pathway performance
+
+# Setup and Data Loading
+
+First, let's load the required packages and initialize our HealthProcessAI components:
+
+```{r libraries, message=FALSE, warning=FALSE}
+# Load required libraries
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(lubridate)
+  library(knitr)
+  library(DT)
+})
+
+# Source HealthProcessAI R modules
+source("../core/step1_data_loader.R")
+source("../core/step2_process_mining.R") 
+source("../core/step4_advanced_analytics.R")
+source("../core/report_generator.R")
+```
+
+## Create Sample Emergency Department Data
+
+For this demonstration, we'll create a realistic dataset representing emergency department patient flows:
+
+```{r create_sample_data}
+create_ed_pathway_data <- function(n_patients = 200) {
+  set.seed(42)  # For reproducibility
+  patients <- data.frame()
+  
+  for (i in 1:n_patients) {
+    case_id <- paste0("ED", sprintf("%04d", i))
+    start_time <- as.POSIXct("2024-01-01") + days(sample(1:90, 1)) + 
+                  hours(sample(0:23, 1)) + minutes(sample(0:59, 1))
+    
+    # Patient characteristics
+    age <- sample(18:95, 1)
+    severity <- sample(c("Minor", "Moderate", "Severe", "Critical"), 1,
+                      prob = c(0.4, 0.3, 0.2, 0.1))
+    
+    # Generate pathway based on severity
+    pathway <- generate_pathway(severity, age)
+    
+    # Create events for this patient
+    current_time <- start_time
+    for (j in 1:nrow(pathway)) {
+      activity <- pathway$activity[j]
+      resource <- pathway$resource[j]
+      duration_mins <- pathway$duration_mins[j]
+      
+      patients <- rbind(patients, data.frame(
+        case = case_id,
+        activity = activity,
+        timestamp = current_time,
+        resource = resource,
+        age = age,
+        severity = severity,
+        duration_mins = duration_mins,
+        stringsAsFactors = FALSE
+      ))
+      
+      current_time <- current_time + minutes(duration_mins)
+    }
+  }
+  
+  return(patients)
+}
+
+generate_pathway <- function(severity, age) {
+  base_pathway <- data.frame(
+    activity = c("Registration", "Triage", "Initial_Assessment"),
+    resource = c("Registration", "Nurse", "Physician"),
+    duration_mins = c(5, 10, 20),
+    stringsAsFactors = FALSE
+  )
+  
+  # Add activities based on severity
+  if (severity == "Minor") {
+    additional <- data.frame(
+      activity = c("Treatment", "Discharge"),
+      resource = c("Nurse", "Physician"),
+      duration_mins = c(30, 10),
+      stringsAsFactors = FALSE
+    )
+  } else if (severity == "Moderate") {
+    additional <- data.frame(
+      activity = c("Lab_Tests", "Radiology", "Treatment", "Observation", "Discharge"),
+      resource = c("Lab", "Radiology", "Physician", "Nurse", "Physician"),
+      duration_mins = c(45, 30, 60, 120, 15),
+      stringsAsFactors = FALSE
+    )
+  } else if (severity == "Severe") {
+    additional <- data.frame(
+      activity = c("Lab_Tests", "Radiology", "Specialist_Consult", 
+                  "Treatment", "Extended_Observation", "Ward_Admission"),
+      resource = c("Lab", "Radiology", "Specialist", "Physician", "Nurse", "Admin"),
+      duration_mins = c(30, 25, 45, 90, 240, 30),
+      stringsAsFactors = FALSE
+    )
+  } else { # Critical
+    additional <- data.frame(
+      activity = c("Immediate_Treatment", "Lab_Tests", "Radiology", 
+                  "ICU_Consult", "ICU_Admission"),
+      resource = c("Emergency_Team", "Lab", "Radiology", "ICU_Physician", "Admin"),
+      duration_mins = c(15, 20, 15, 30, 45),
+      stringsAsFactors = FALSE
+    )
+  }
+  
+  return(rbind(base_pathway, additional))
+}
+
+# Generate the sample dataset
+ed_data <- create_ed_pathway_data(n_patients = 200)
+
+# Display basic information about the dataset
+cat("Emergency Department Dataset Overview:\n")
+cat("- Total events:", nrow(ed_data), "\n")
+cat("- Unique patients:", length(unique(ed_data$case)), "\n")
+cat("- Date range:", as.character(range(ed_data$timestamp)), "\n")
+cat("- Activities:", length(unique(ed_data$activity)), "\n")
+cat("- Resources:", length(unique(ed_data$resource)), "\n")
+
+# Show first few rows
+head(ed_data) %>% kable(caption = "Sample Emergency Department Event Data")
+```
+
+# Pathway Discovery and Analysis
+
+## Step 1: Load and Validate Data
+
+```{r load_data}
+# Initialize the data loader
+loader <- EventLogLoader$new()
+
+# Convert our sample data to event log format
+event_log <- loader$convert_to_event_log(ed_data)
+
+# Display validation results
+validation_results <- loader$validate_event_log(event_log)
+cat("Data Validation Results:\n")
+cat("- Valid cases:", validation_results$valid_cases, "\n")
+cat("- Valid events:", validation_results$valid_events, "\n")
+cat("- Data quality score:", round(validation_results$quality_score, 3), "\n")
+```
+
+## Step 2: Process Mining and Pathway Discovery
+
+```{r process_mining}
+# Initialize the process miner
+miner <- ProcessMiner$new()
+
+# Discover the Directly-Follows Graph (DFG)
+dfg_result <- miner$discover_dfg(event_log)
+
+cat("Process Discovery Results:\n")
+cat("- Unique activities:", length(dfg_result$activities), "\n")
+cat("- Process transitions:", nrow(dfg_result$transitions), "\n")
+cat("- Start activities:", length(dfg_result$start_activities), "\n")
+cat("- End activities:", length(dfg_result$end_activities), "\n")
+
+# Display most frequent transitions
+top_transitions <- dfg_result$transitions %>%
+  arrange(desc(frequency)) %>%
+  head(10)
+
+kable(top_transitions, caption = "Top 10 Most Frequent Process Transitions")
+```
+
+## Step 3: Pathway Variant Analysis
+
+```{r pathway_variants}
+# Identify process variants
+variants <- miner$identify_variants(event_log)
+
+cat("Pathway Variant Analysis:\n")
+cat("- Total variants found:", length(variants$variants), "\n")
+cat("- Most common variant covers", 
+    round(max(variants$variant_frequencies) * 100, 1), "% of cases\n")
+
+# Display top variants
+top_variants <- variants$variant_summary %>%
+  head(8)
+
+kable(top_variants, caption = "Most Common Clinical Pathway Variants")
+
+# Visualize variant distribution
+variants$variant_summary %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(variant_id, frequency), y = frequency)) +
+  geom_col(fill = "steelblue", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Emergency Department Pathway Variants",
+    subtitle = "Distribution of most common patient journey patterns",
+    x = "Pathway Variant",
+    y = "Number of Patients",
+    caption = "Data: Simulated ED patient flows"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12, color = "gray60"),
+    axis.text.y = element_text(size = 8)
+  )
+```
+
+## Step 4: Performance Analysis
+
+```{r performance_analysis}
+# Calculate performance metrics
+performance <- miner$calculate_performance_metrics(event_log)
+
+cat("Process Performance Metrics:\n")
+cat("- Average case duration:", round(performance$avg_case_duration, 1), "minutes\n")
+cat("- Median case duration:", round(performance$median_case_duration, 1), "minutes\n")
+cat("- Case duration std dev:", round(performance$std_case_duration, 1), "minutes\n")
+
+# Activity-level performance
+activity_performance <- performance$activity_metrics
+kable(activity_performance, caption = "Performance Metrics by Activity")
+
+# Visualize case duration distribution by severity
+ed_data %>%
+  group_by(case, severity) %>%
+  summarise(
+    total_duration = sum(duration_mins, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = severity, y = total_duration, fill = severity)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(
+    title = "Emergency Department Length of Stay by Severity",
+    subtitle = "Distribution of total patient journey duration",
+    x = "Patient Severity Level",
+    y = "Total Duration (minutes)",
+    fill = "Severity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(type = "qual", palette = "Set2")
+```
+
+## Step 5: Bottleneck Identification
+
+```{r bottleneck_analysis}
+# Identify process bottlenecks
+bottlenecks <- miner$identify_bottlenecks(event_log)
+
+cat("Bottleneck Analysis Results:\n")
+cat("- Activities analyzed:", length(bottlenecks$activity_bottlenecks), "\n")
+cat("- Critical bottlenecks identified:", 
+    sum(bottlenecks$activity_bottlenecks$is_bottleneck), "\n")
+
+# Display bottleneck activities
+bottleneck_activities <- bottlenecks$activity_bottlenecks %>%
+  filter(is_bottleneck == TRUE) %>%
+  arrange(desc(avg_waiting_time))
+
+kable(bottleneck_activities, caption = "Identified Process Bottlenecks")
+
+# Visualize bottlenecks
+bottlenecks$activity_bottlenecks %>%
+  arrange(desc(avg_waiting_time)) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(activity, avg_waiting_time), y = avg_waiting_time)) +
+  geom_col(aes(fill = is_bottleneck), alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Activity Performance Analysis",
+    subtitle = "Average waiting time by clinical activity",
+    x = "Clinical Activity",
+    y = "Average Waiting Time (minutes)",
+    fill = "Is Bottleneck"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("FALSE" = "lightblue", "TRUE" = "coral"))
+```
+
+# Advanced Analytics
+
+## Resource Utilization Analysis
+
+```{r resource_analysis}
+# Analyze resource utilization
+resource_analysis <- ed_data %>%
+  group_by(resource, severity) %>%
+  summarise(
+    patient_count = n_distinct(case),
+    total_duration = sum(duration_mins, na.rm = TRUE),
+    avg_duration = mean(duration_mins, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_duration))
+
+kable(head(resource_analysis, 12), caption = "Resource Utilization by Severity Level")
+
+# Visualize resource workload
+resource_analysis %>%
+  group_by(resource) %>%
+  summarise(
+    total_patients = sum(patient_count),
+    total_time = sum(total_duration),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_time)) %>%
+  head(8) %>%
+  ggplot(aes(x = reorder(resource, total_time), y = total_time)) +
+  geom_col(fill = "darkblue", alpha = 0.7) +
+  coord_flip() +
+  labs(
+    title = "Resource Utilization in Emergency Department",
+    subtitle = "Total time allocated by resource type",
+    x = "Resource Type",
+    y = "Total Time (minutes)",
+    caption = "Higher values indicate heavier resource utilization"
+  ) +
+  theme_minimal()
+```
+
+## Temporal Pattern Analysis
+
+```{r temporal_patterns}
+# Analyze temporal patterns
+temporal_patterns <- ed_data %>%
+  mutate(
+    hour_of_day = hour(timestamp),
+    day_of_week = wday(timestamp, label = TRUE),
+    is_weekend = wday(timestamp) %in% c(1, 7)
+  ) %>%
+  group_by(hour_of_day, severity) %>%
+  summarise(
+    patient_count = n_distinct(case),
+    .groups = "drop"
+  )
+
+# Visualize hourly patient patterns
+temporal_patterns %>%
+  ggplot(aes(x = hour_of_day, y = patient_count, fill = severity)) +
+  geom_area(alpha = 0.7, position = "stack") +
+  labs(
+    title = "Emergency Department Patient Arrivals by Hour",
+    subtitle = "Daily pattern of patient presentations by severity",
+    x = "Hour of Day",
+    y = "Number of Patients",
+    fill = "Severity Level"
+  ) +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(0, 23, 3)) +
+  scale_fill_brewer(type = "qual", palette = "Set1")
+```
+
+# Clinical Insights and Recommendations
+
+## Pathway Efficiency Metrics
+
+```{r efficiency_metrics}
+# Calculate pathway efficiency metrics
+efficiency_metrics <- ed_data %>%
+  group_by(case, severity) %>%
+  summarise(
+    pathway_length = n(),
+    total_duration = sum(duration_mins),
+    unique_resources = n_distinct(resource),
+    .groups = "drop"
+  ) %>%
+  group_by(severity) %>%
+  summarise(
+    avg_pathway_length = round(mean(pathway_length), 1),
+    avg_duration = round(mean(total_duration), 1),
+    avg_resources = round(mean(unique_resources), 1),
+    efficiency_score = round(avg_pathway_length / (avg_duration / 60), 2),
+    .groups = "drop"
+  )
+
+kable(efficiency_metrics, caption = "Pathway Efficiency Metrics by Severity Level")
+```
+
+## Quality Indicators
+
+```{r quality_indicators}
+# Calculate quality indicators
+quality_indicators <- list(
+  total_patients = length(unique(ed_data$case)),
+  avg_length_of_stay = round(mean(aggregate(duration_mins ~ case, ed_data, sum)$duration_mins), 1),
+  pathway_compliance = round(length(variants$variants) / length(unique(ed_data$case)) * 100, 1),
+  resource_efficiency = round(nrow(ed_data) / length(unique(ed_data$resource)), 1)
+)
+
+cat("Quality Indicators Summary:\n")
+for (indicator in names(quality_indicators)) {
+  cat("-", indicator, ":", quality_indicators[[indicator]], "\n")
+}
+```
+
+# Actionable Recommendations
+
+Based on our pathway discovery analysis, here are key recommendations:
+
+## 1. **Bottleneck Resolution**
+```{r recommendations_bottlenecks, echo=FALSE}
+if (nrow(bottleneck_activities) > 0) {
+  cat("Priority bottlenecks to address:\n")
+  for (i in 1:min(3, nrow(bottleneck_activities))) {
+    activity <- bottleneck_activities$activity[i]
+    wait_time <- round(bottleneck_activities$avg_waiting_time[i], 1)
+    cat(paste0("- ", activity, " (avg wait: ", wait_time, " minutes)\n"))
+  }
+} else {
+  cat("No critical bottlenecks identified in current analysis.\n")
+}
+```
+
+## 2. **Resource Optimization**
+- **Peak hour staffing**: Increase resources during high-volume hours (typically 10 AM - 6 PM)
+- **Severity-based allocation**: Allocate specialist resources based on patient acuity patterns
+- **Cross-training**: Train staff on multiple activities to improve flexibility
+
+## 3. **Process Improvements**
+- **Pathway standardization**: Develop standard protocols for the top 5 pathway variants
+- **Parallel processing**: Enable concurrent activities where clinically appropriate
+- **Early assessment**: Implement rapid assessment protocols for high-severity cases
+
+## 4. **Quality Metrics**
+- **Target length of stay**: Aim for severity-specific duration targets
+- **Pathway compliance**: Monitor adherence to established clinical protocols
+- **Resource utilization**: Optimize resource allocation based on demand patterns
+
+# Conclusion
+
+This analysis demonstrates how HealthProcessAI's R implementation can effectively:
+
+1. **Discover clinical pathways** from event log data
+2. **Identify process variants** and their frequencies  
+3. **Detect bottlenecks** and inefficiencies
+4. **Analyze resource utilization** patterns
+5. **Generate actionable insights** for process improvement
+
+## Next Steps
+
+1. **Real data integration**: Replace sample data with actual clinical event logs
+2. **Conformance checking**: Compare actual pathways against established protocols
+3. **Predictive modeling**: Build models to predict pathway outcomes
+4. **Continuous monitoring**: Implement ongoing pathway performance monitoring
+5. **Clinical validation**: Validate findings with clinical domain experts
+
+---
+
+**About SMAILE Lab**
+
+This vignette was developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet. For more information, visit [https://smile.ki.se](https://smile.ki.se).
+
+**HealthProcessAI Repository**: [https://github.com/ki-smile/HealthProcessAI](https://github.com/ki-smile/HealthProcessAI)

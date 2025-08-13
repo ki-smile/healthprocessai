@@ -1293,4 +1293,4 @@ This comprehensive comparison was developed by:
 - **Kaile Chen**: Healthcare data scientist specializing in clinical analytics, responsible for use case analysis and healthcare-specific performance considerations.
 
 *This comparison is based on PM4PY 2.7+ and bupaR 0.5+ as of 2024*  
-*Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet*
+*Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet*

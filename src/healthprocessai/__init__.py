@@ -5,7 +5,7 @@ HealthProcessAI - Process Mining Framework for Healthcare & Life Sciences
 A comprehensive framework for applying process mining techniques to healthcare data,
 with integrated AI capabilities for generating clinical insights.
 
-Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet
+Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet
 
 Main Components:
 - Data Loading and Preparation
@@ -87,7 +87,7 @@ def about():
     {PACKAGE_NAME} v{__version__}
     {PACKAGE_DESCRIPTION}
     
-    Developed at SMAILE (Stockholm Medical AI Lab for Enhancement)
+    Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments)
     Karolinska Institutet, Stockholm, Sweden
     
     For more information, visit: {PACKAGE_URL}

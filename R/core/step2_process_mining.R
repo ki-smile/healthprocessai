@@ -24,7 +24,7 @@
 # - Python variants -> R trace_explorer()
 # - Python metrics -> R process statistics
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries

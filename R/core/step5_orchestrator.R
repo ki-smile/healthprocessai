@@ -27,7 +27,7 @@
 # - Python file I/O -> R readLines/writeLines
 # - Python datetime -> R Sys.time/format
 #
-# Developed at SMAILE (Stockholm Medical AI Lab for Enhancement),
+# Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments),
 # Karolinska Institutet
 
 # Load required libraries

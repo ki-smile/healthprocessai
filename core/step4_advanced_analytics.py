@@ -207,19 +207,27 @@ class AdvancedProcessAnalyzer:
                 clusters = clusterer.fit_predict(scaled_features)
             else:
                 raise ValueError(f"Unsupported clustering method: {method}")
-        except AttributeError as e:
-            # Fallback for threadpool issues
-            logger.warning(f"Clustering failed due to threadpool issue: {e}")
+        except (AttributeError, Exception) as e:
+            # Fallback for threadpool issues (catches the specific 'NoneType' has no 'split' error)
+            logger.warning(f"Clustering failed due to threadpool/sklearn issue: {e}")
             logger.info("Using fallback clustering method...")
             # Simple fallback: assign clusters based on case duration quantiles
             durations = feature_matrix[:, 0]  # First feature is usually duration
-            clusters = pd.qcut(durations, q=n_clusters if n_clusters else 3, 
-                              labels=False, duplicates='drop')
+            try:
+                clusters = pd.qcut(durations, q=n_clusters if n_clusters else 3, 
+                                  labels=False, duplicates='drop')
+            except:
+                # Even simpler fallback if qcut fails
+                clusters = np.array([i % (n_clusters if n_clusters else 3) for i in range(len(durations))])
             method = f"{method}_fallback"
 
         # Calculate cluster quality metrics
         if len(set(clusters)) > 1:
-            silhouette = silhouette_score(scaled_features, clusters)
+            try:
+                silhouette = silhouette_score(scaled_features, clusters)
+            except (AttributeError, Exception) as e:
+                logger.warning(f"Silhouette score calculation failed: {e}")
+                silhouette = -1  # Default fallback score
         else:
             silhouette = -1
 
@@ -290,23 +298,41 @@ class AdvancedProcessAnalyzer:
     def _find_optimal_clusters(self, data: np.ndarray, max_k: int = 10) -> int:
         """
         Find optimal number of clusters using elbow method and silhouette analysis.
+        Uses fallback method to avoid ThreadPool issues.
         """
-        scores = []
-        k_range = range(2, min(max_k, len(data)))
+        try:
+            # Try sklearn approach first
+            scores = []
+            k_range = range(2, min(max_k, len(data)))
 
-        for k in k_range:
-            kmeans = KMeans(n_clusters=k, random_state=42)
-            labels = kmeans.fit_predict(data)
-            score = silhouette_score(data, labels)
-            scores.append(score)
+            for k in k_range:
+                kmeans = KMeans(n_clusters=k, random_state=42)
+                labels = kmeans.fit_predict(data)
+                score = silhouette_score(data, labels)
+                scores.append(score)
 
-        # Find elbow point
-        if scores:
-            optimal_k = k_range[np.argmax(scores)]
-        else:
-            optimal_k = 3  # Default
-
-        return optimal_k
+            # Find elbow point
+            if scores:
+                optimal_k = k_range[np.argmax(scores)]
+            else:
+                optimal_k = 3  # Default
+            
+            return optimal_k
+            
+        except Exception as e:
+            logger.warning(f"sklearn clustering failed due to threading issue: {e}")
+            logger.info("Using simple fallback clustering method")
+            
+            # Simple fallback: base on data size
+            n_cases = len(data)
+            if n_cases < 5:
+                return 2
+            elif n_cases < 20:
+                return 3
+            elif n_cases < 50:
+                return 4
+            else:
+                return 5
 
     def _analyze_clusters(self, clusters: np.ndarray, features: np.ndarray) -> Dict:
         """

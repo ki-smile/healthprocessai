@@ -4,7 +4,7 @@
 
 This directory contains the R implementation of HealthProcessAI using the bupaR ecosystem for process mining and httr2 for LLM integration.
 
-**Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet**
+**Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet**
 
 ## 📁 Directory Structure
 
@@ -104,3 +104,5 @@ This R implementation maintains feature parity with the Python version and can:
 ---
 
 *For questions or support, visit: https://github.com/ki-smile/HealthProcessAI*
+
+*SMAILE Lab: https://smile.ki.se*

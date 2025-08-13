@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ki-smile/HealthProcessAI/blob/main/notebooks/HealthProcessAI_Python_Colab.ipynb)
 
-**Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet**
+**Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet**
 
 HealthProcessAI is a comprehensive dual-language (Python & R) framework for applying process mining techniques to healthcare data, with integrated AI capabilities for generating clinical insights.
 
@@ -311,7 +311,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 ### Contributing Organizations
 
-- **SMAILE Lab** (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet
+- **SMAILE Lab** (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet
 - Department of Clinical Science, Intervention and Technology, Karolinska Institutet
 
 ## 🙏 Acknowledgments
@@ -346,4 +346,4 @@ If you use HealthProcessAI in your research, please cite:
 
 ---
 
-*Developed with ❤️ at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet*
+*Developed with ❤️ at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet*

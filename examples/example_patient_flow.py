@@ -175,8 +175,9 @@ class PatientFlowAnalyzer:
         pathway_weights = [0.3, 0.4, 0.2, 0.1]  # Severe, Moderate, Quick, Complex
 
         for case_id in range(1, 101):  # Generate 100 cases
-            # Select pathway based on weights
-            pathway = np.random.choice(pathways, p=pathway_weights)
+            # Select pathway based on weights - use indices instead of direct array choice
+            pathway_idx = np.random.choice(len(pathways), p=pathway_weights)
+            pathway = pathways[pathway_idx]
 
             # Starting time for this case
             case_start = base_time + timedelta(days=np.random.uniform(0, 30))
@@ -389,10 +390,15 @@ class PatientFlowAnalyzer:
         # Create DataFrame with variant information
         variant_data = []
         for variant_str, cases in variants.items():
-            activities = variant_str.split(",")
+            # Handle both string and tuple formats
+            if isinstance(variant_str, str):
+                activities = variant_str.split(",")
+            else:
+                # Convert tuple to list
+                activities = list(variant_str)
             variant_data.append(
                 {
-                    "variant": variant_str,
+                    "variant": str(variant_str),  # Convert to string for consistency
                     "n_cases": len(cases),
                     "percentage": len(cases) / len(self.event_log) * 100,
                     "n_activities": len(activities),

@@ -374,6 +374,7 @@ class LLMAnalyzer:
 
 ### Dataset Overview
 - **Total Cases**: {num_cases}
+- **Sepsis Rate**: {sepsis_rate}%
 - **Analysis Period**: {date_range}
 - **Average Case Duration**: {avg_duration} hours
 - **Unique Process Variants**: {num_variants}
@@ -449,6 +450,7 @@ Clinical validation is recommended before making treatment decisions.*
             "ai_model": metadata.get("ai_model", "Multiple Models"),
             "executive_summary": executive_summary,
             "num_cases": process_data.get("num_cases", "N/A"),
+            "sepsis_rate": f"{process_data.get('sepsis_rate', 0) * 100:.1f}" if process_data.get('sepsis_rate') is not None else "N/A",
             "date_range": metadata.get("date_range", "See dataset"),
             "avg_duration": process_data.get("avg_case_duration_hours", "N/A"),
             "num_variants": process_data.get("num_variants", "N/A"),

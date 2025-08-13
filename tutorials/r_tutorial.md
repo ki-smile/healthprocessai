@@ -1063,7 +1063,7 @@ Based on the process mining analysis, key recommendations include:
 ---
 
 *Report generated using HealthProcessAI with R and bupaR*  
-*Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet*
+*Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet*
 '
   
   # Write template to file
@@ -1918,7 +1918,7 @@ You've completed the comprehensive R tutorial for HealthProcessAI. You now have 
 
 ---
 
-*This tutorial is part of HealthProcessAI - Developed at SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet*
+*This tutorial is part of HealthProcessAI - Developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet*
 
 **Contributors:**
 - **Farhad Abtahi** - Framework Architecture & Educational Design

@@ -1,0 +1,519 @@
+---
+title: "Getting Started with HealthProcessAI in R"
+author: "SMAILE Lab, Karolinska Institutet"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    df_print: paged
+  pdf_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Getting Started with HealthProcessAI in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  dpi = 150
+)
+```
+
+# Welcome to HealthProcessAI R Implementation
+
+HealthProcessAI provides a comprehensive R framework for healthcare process mining with integrated Large Language Model (LLM) capabilities. This getting started guide will walk you through:
+
+- Installation and setup
+- Basic concepts and terminology
+- Your first process mining analysis
+- Integration with LLMs for clinical insights
+- Next steps and advanced features
+
+## What is Healthcare Process Mining?
+
+Process mining is a data science technique that uses event logs to:
+
+- **Discover** actual care pathways from healthcare data
+- **Analyze** process performance and identify bottlenecks
+- **Monitor** compliance with clinical protocols
+- **Improve** healthcare processes through data-driven insights
+
+HealthProcessAI combines traditional process mining with AI-powered analysis to generate actionable clinical insights.
+
+# Installation and Setup
+
+## 1. Install Required Packages
+
+```{r install_packages, eval=FALSE}
+# Install required CRAN packages
+install.packages(c(
+  "tidyverse", "R6", "httr2", "jsonlite", 
+  "lubridate", "cluster", "rmarkdown"
+))
+
+# Install suggested packages for enhanced functionality
+install.packages(c(
+  "bupaR", "edeaR", "processmapR", "ggplot2", 
+  "testthat", "styler", "lintr"
+))
+```
+
+## 2. Load HealthProcessAI
+
+```{r load_packages, message=FALSE, warning=FALSE}
+# Load required libraries
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(lubridate)
+  library(ggplot2)
+  library(knitr)
+})
+
+# Source HealthProcessAI R modules
+# Note: In a real installation, these would be loaded via library(HealthProcessAI)
+source("../core/step1_data_loader.R")
+source("../core/step2_process_mining.R") 
+source("../core/step3_llm_integration.R")
+source("../core/step4_advanced_analytics.R")
+source("../core/step5_orchestrator.R")
+source("../core/report_generator.R")
+
+cat("✅ HealthProcessAI R modules loaded successfully!\n")
+```
+
+## 3. Verify Installation
+
+```{r verify_installation}
+# Verify core classes can be instantiated
+tryCatch({
+  loader <- EventLogLoader$new()
+  miner <- ProcessMiner$new()
+  generator <- ReportGenerator$new()
+  
+  cat("✅ All core components initialized successfully!\n")
+  cat("🚀 Ready to start process mining!\n")
+}, error = function(e) {
+  cat("❌ Error during initialization:", conditionMessage(e), "\n")
+})
+```
+
+# Basic Concepts and Terminology
+
+## Key Components
+
+HealthProcessAI follows a **5-step modular pipeline**:
+
+1. **Data Loading** (`EventLogLoader`) - Load and validate healthcare event logs
+2. **Process Mining** (`ProcessMiner`) - Discover clinical pathways using bupaR
+3. **LLM Integration** (`LLMAnalyzer`) - Generate AI-powered insights
+4. **Advanced Analytics** (`AdvancedProcessAnalyzer`) - Clustering and predictions
+5. **Report Orchestration** (`ReportOrchestrator`) - Multi-model consensus building
+
+## Event Log Format
+
+Healthcare event logs contain:
+- **Case**: Unique patient/episode identifier
+- **Activity**: Clinical activity or event name  
+- **Timestamp**: When the activity occurred
+- **Resource**: Who performed the activity (optional)
+- **Additional attributes**: Patient demographics, severity, etc.
+
+# Your First Process Mining Analysis
+
+Let's create and analyze a simple healthcare dataset to demonstrate the core workflow.
+
+## Step 1: Create Sample Data
+
+```{r create_sample_data}
+# Create sample emergency department data
+create_sample_ed_data <- function(n_patients = 50) {
+  set.seed(123)  # For reproducibility
+  events <- data.frame()
+  
+  for (i in 1:n_patients) {
+    case_id <- sprintf("ED_%03d", i)
+    arrival_time <- as.POSIXct("2024-01-01") + 
+                    days(sample(1:30, 1)) + 
+                    hours(sample(8:20, 1))
+    
+    # Define pathway based on patient severity
+    severity <- sample(c("Low", "Medium", "High"), 1, prob = c(0.5, 0.3, 0.2))
+    
+    if (severity == "Low") {
+      pathway <- data.frame(
+        activity = c("Arrival", "Triage", "Consultation", "Discharge"),
+        duration_mins = c(0, 10, 30, 10)
+      )
+    } else if (severity == "Medium") {
+      pathway <- data.frame(
+        activity = c("Arrival", "Triage", "Consultation", "Tests", "Treatment", "Discharge"),
+        duration_mins = c(0, 10, 20, 45, 60, 15)
+      )
+    } else {  # High severity
+      pathway <- data.frame(
+        activity = c("Arrival", "Triage", "Emergency_Treatment", 
+                    "Tests", "Specialist_Consult", "Admission"),
+        duration_mins = c(0, 5, 15, 30, 45, 30)
+      )
+    }
+    
+    # Generate events with timestamps
+    current_time <- arrival_time
+    for (j in 1:nrow(pathway)) {
+      events <- rbind(events, data.frame(
+        case = case_id,
+        activity = pathway$activity[j],
+        timestamp = current_time,
+        resource = paste0("Resource_", sample(1:5, 1)),
+        severity = severity,
+        stringsAsFactors = FALSE
+      ))
+      current_time <- current_time + minutes(pathway$duration_mins[j])
+    }
+  }
+  
+  return(events)
+}
+
+# Generate sample data
+sample_data <- create_sample_ed_data(n_patients = 100)
+
+cat("Sample Emergency Department Data:\n")
+cat("- Total events:", nrow(sample_data), "\n")
+cat("- Unique patients:", length(unique(sample_data$case)), "\n")
+cat("- Activities:", length(unique(sample_data$activity)), "\n")
+cat("- Date range:", paste(range(as.Date(sample_data$timestamp)), collapse = " to "), "\n")
+
+# Display first few rows
+head(sample_data) %>% kable(caption = "Sample Emergency Department Events")
+```
+
+## Step 2: Load and Validate Data
+
+```{r load_validate_data}
+# Initialize data loader
+loader <- EventLogLoader$new()
+
+# Convert to standard event log format
+event_log <- loader$convert_to_event_log(sample_data)
+
+# Validate the data
+validation <- loader$validate_event_log(event_log)
+
+cat("Data Validation Results:\n")
+cat("- Quality Score:", round(validation$quality_score, 2), "/100\n")
+cat("- Valid Cases:", validation$valid_cases, "\n")
+cat("- Valid Events:", validation$valid_events, "\n")
+
+if (length(validation$issues) > 0) {
+  cat("- Issues Found:", length(validation$issues), "\n")
+  for (issue in validation$issues[1:min(3, length(validation$issues))]) {
+    cat("  •", issue, "\n")
+  }
+}
+```
+
+## Step 3: Discover Process Patterns
+
+```{r discover_process}
+# Initialize process miner
+miner <- ProcessMiner$new()
+
+# Discover the Directly-Follows Graph
+dfg_result <- miner$discover_dfg(event_log)
+
+cat("Process Discovery Results:\n")
+cat("- Unique Activities:", length(dfg_result$activities), "\n")
+cat("- Process Transitions:", nrow(dfg_result$transitions), "\n")
+
+# Show top transitions
+cat("\nMost Frequent Process Transitions:\n")
+top_transitions <- dfg_result$transitions %>%
+  arrange(desc(frequency)) %>%
+  head(8)
+
+kable(top_transitions, caption = "Most Common Activity Transitions")
+```
+
+## Step 4: Analyze Process Variants
+
+```{r analyze_variants}
+# Identify process variants (different patient pathways)
+variants <- miner$identify_variants(event_log)
+
+cat("Pathway Variants Analysis:\n")
+cat("- Total Variants:", length(variants$variants), "\n")
+cat("- Most Common Variant:", 
+    round(max(variants$variant_frequencies) * 100, 1), "% of patients\n")
+
+# Display variant summary
+variant_summary <- variants$variant_summary %>%
+  head(6)
+
+kable(variant_summary, caption = "Most Common Patient Pathways")
+
+# Visualize variant distribution
+variants$variant_summary %>%
+  head(8) %>%
+  ggplot(aes(x = reorder(variant_id, frequency), y = frequency)) +
+  geom_col(fill = "steelblue", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Emergency Department Patient Pathway Variants",
+    subtitle = "Distribution of different patient journey patterns",
+    x = "Pathway Variant",
+    y = "Number of Patients"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(color = "gray60")
+  )
+```
+
+## Step 5: Performance Analysis
+
+```{r performance_analysis}
+# Calculate performance metrics
+performance <- miner$calculate_performance_metrics(event_log)
+
+cat("Process Performance Overview:\n")
+cat("- Average Case Duration:", round(performance$avg_case_duration, 1), "minutes\n")
+cat("- Median Case Duration:", round(performance$median_case_duration, 1), "minutes\n")
+
+# Activity-level performance
+activity_perf <- performance$activity_metrics %>%
+  arrange(desc(avg_duration))
+
+kable(head(activity_perf), caption = "Activity Performance Metrics")
+
+# Visualize case durations by severity
+sample_data %>%
+  group_by(case, severity) %>%
+  summarise(
+    start_time = min(timestamp),
+    end_time = max(timestamp),
+    total_duration = as.numeric(difftime(end_time, start_time, units = "mins")),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = severity, y = total_duration, fill = severity)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(
+    title = "Emergency Department Length of Stay by Severity",
+    x = "Patient Severity",
+    y = "Total Duration (minutes)",
+    fill = "Severity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+# LLM Integration for Clinical Insights
+
+*Note: LLM features require an OpenRouter API key. Get yours at [https://openrouter.ai](https://openrouter.ai)*
+
+## Setting up LLM Integration
+
+```{r llm_setup, eval=FALSE}
+# Set your API key (do this once per session)
+Sys.setenv(OPENROUTER_API_KEY = "your-api-key-here")
+
+# Initialize LLM analyzer
+analyzer <- LLMAnalyzer$new(api_key = Sys.getenv("OPENROUTER_API_KEY"))
+
+# Check available models
+models <- analyzer$get_available_models()
+head(models[c("id", "name", "pricing")]) %>% kable()
+```
+
+## Generate Clinical Insights
+
+```{r llm_analysis, eval=FALSE}
+# Create clinical analysis prompt
+process_summary <- list(
+  total_patients = length(unique(event_log$case)),
+  avg_duration = round(performance$avg_case_duration, 1),
+  top_activities = head(dfg_result$activities, 5),
+  main_pathways = head(variants$variant_summary$pathway, 3)
+)
+
+prompt <- analyzer$create_clinical_prompt(
+  process_summary = process_summary,
+  context_info = list(
+    setting = "Emergency Department",
+    timeframe = "1 month analysis",
+    focus = "process optimization"
+  )
+)
+
+# Query Claude for insights
+insights <- analyzer$query_model(
+  model_name = "anthropic/claude-3.5-sonnet",
+  prompt = prompt,
+  temperature = 0.3
+)
+
+cat("Clinical Insights Generated:\n")
+cat("- Response length:", nchar(insights$response), "characters\n")
+cat("- Tokens used:", insights$usage$total_tokens, "\n")
+cat("- Model:", insights$model, "\n")
+
+# Display insights (first 500 characters)
+cat("\nInsights Preview:\n")
+cat(substr(insights$response, 1, 500), "...\n")
+```
+
+# Advanced Features
+
+## Generate Comprehensive Report
+
+```{r generate_report}
+# Initialize report generator
+generator <- ReportGenerator$new()
+
+# Prepare results for reporting
+analysis_results <- list(
+  event_log = event_log,
+  dfg_result = dfg_result,
+  variants = variants,
+  performance = performance,
+  metadata = list(
+    analysis_date = Sys.Date(),
+    dataset_info = "Emergency Department Sample Data",
+    analyst = "HealthProcessAI Tutorial"
+  )
+)
+
+# Generate markdown report
+report_content <- generator$generate_markdown_report(
+  results = analysis_results,
+  title = "Emergency Department Process Analysis",
+  include_visualizations = TRUE
+)
+
+# Save report (optional)
+# writeLines(report_content, "ed_analysis_report.md")
+
+cat("✅ Comprehensive report generated!\n")
+cat("Report sections:", length(strsplit(report_content, "##")[[1]]), "\n")
+cat("Report length:", nchar(report_content), "characters\n")
+```
+
+## Health Check
+
+```{r health_check, eval=FALSE}
+# Run comprehensive health check
+source("../comprehensive_health_check.R")
+
+checker <- ComprehensiveHealthChecker$new()
+health_report <- checker$run_all_checks()
+
+cat("Health Check Summary:\n")
+cat("- Total Checks:", health_report$summary$total_checks, "\n")
+cat("- Passed:", health_report$summary$passed, "\n")
+cat("- Failed:", health_report$summary$failed, "\n")
+cat("- Warnings:", health_report$summary$warnings, "\n")
+cat("- Overall Status:", health_report$summary$status, "\n")
+```
+
+# Next Steps
+
+Congratulations! You've completed your first HealthProcessAI analysis. Here are recommended next steps:
+
+## 1. **Explore Real Data**
+- Load your own healthcare event logs
+- Use `EventLogLoader$load_from_csv()` for CSV files
+- Try `EventLogLoader$load_from_excel()` for Excel data
+
+## 2. **Advanced Analytics**
+```{r next_steps_advanced, eval=FALSE}
+# Initialize advanced analyzer
+advanced <- AdvancedProcessAnalyzer$new(event_log)
+
+# Cluster patient pathways
+clusters <- advanced$cluster_patient_pathways(n_clusters = 3)
+
+# Calculate clinical KPIs
+kpis <- advanced$calculate_clinical_kpis()
+
+# Predictive monitoring
+predictions <- advanced$predictive_monitoring()
+```
+
+## 3. **Multi-Model LLM Analysis**
+```{r next_steps_llm, eval=FALSE}
+# Compare insights from multiple models
+comparison <- analyzer$multi_model_analysis(
+  models = c("anthropic/claude-3.5-sonnet", "google/gemini-pro"),
+  prompt = clinical_prompt
+)
+
+# Use report orchestrator for consensus
+orchestrator <- ReportOrchestrator$new()
+consolidated <- orchestrator$consolidate_reports(comparison$responses)
+```
+
+## 4. **Integration with bupaR**
+```{r next_steps_bupar, eval=FALSE}
+# Convert to bupaR for advanced process mining
+bupar_log <- loader$convert_to_bupar(event_log)
+
+# Use bupaR directly for specialized analysis
+library(bupaR)
+library(processmapR)
+
+# Create process map
+bupar_log %>% process_map()
+
+# Analyze resource utilization
+bupar_log %>% resource_frequency()
+```
+
+## 5. **Custom Visualizations**
+```{r next_steps_viz, eval=FALSE}
+# Create custom process visualizations
+process_map <- miner$visualize_process_map(dfg_result)
+print(process_map)
+
+# Timeline analysis
+timeline_plot <- advanced$create_timeline_analysis(event_log)
+print(timeline_plot)
+```
+
+# Getting Help
+
+## Documentation and Resources
+
+- **Package Help**: Use `?EventLogLoader`, `?ProcessMiner`, etc.
+- **Vignettes**: Browse `browseVignettes("HealthProcessAI")` for more tutorials
+- **Examples**: Check the `R/examples/` directory for complete workflows
+- **Tests**: Review `R/tests/` for usage examples and edge cases
+
+## Community and Support
+
+- **GitHub Repository**: [https://github.com/ki-smile/HealthProcessAI](https://github.com/ki-smile/HealthProcessAI)
+- **SMAILE Lab**: [https://smile.ki.se](https://smile.ki.se)
+- **Issues**: Report bugs and request features on GitHub
+
+## Additional Vignettes
+
+- `clinical-pathway-discovery.Rmd` - Advanced pathway analysis
+- `sepsis-analysis-tutorial.Rmd` - Sepsis-specific workflows
+- `llm-integration-guide.Rmd` - Comprehensive LLM usage
+- `performance-optimization.Rmd` - Optimizing analysis performance
+
+---
+
+**Happy Process Mining!** 🏥📊🚀
+
+*This tutorial was developed at SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet.*

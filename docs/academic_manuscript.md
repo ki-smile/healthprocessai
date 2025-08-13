@@ -2,7 +2,7 @@
 
 **Authors:** Eduardo Illueca Fernandez¹, Kaile Chen¹, Fernando Seoane¹, Farhad Abtahi¹
 
-¹ SMAILE (Stockholm Medical AI Lab for Enhancement), Karolinska Institutet, Stockholm, Sweden
+¹ SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments), Karolinska Institutet, Stockholm, Sweden
 
 ## Abstract
 
@@ -787,7 +787,7 @@ This research was conducted in accordance with the Declaration of Helsinki using
 
 ## Funding
 
-This work was supported by grants from the XXXXX at Karolinska Institutet and SMAILE (Stockholm Medical AI Lab for Enhancement).
+This work was supported by grants from the XXXXX at Karolinska Institutet and SMAILE (Stockholm Medical Artificial Intelligence and Learning Environments).
 
 ## Author Contributions
 
