@@ -37,7 +37,7 @@ You are an expert evaluator for healthcare process mining reports. You will eval
 
 ### 6. ACCURACY
 - **4 (Exemplary)**: Clinically and contextually accurate. Terminology and figures aligned with process map and domain standards.
-- **3 (Proficient)**: Mostly accurate with minor issues that don't affect the core message.
+- **3 (Proficient)**: Mostly accurate with minor issues that don't affect the core message, or just fail in calculating some figures that are not feasible for a LLM.
 - **2 (Needs Improvement)**: Noticeable errors in clinical interpretation, terms, or figure use.
 - **1 (Insufficient)**: Major inaccuracies or misinterpretations compromising validity.
 
