@@ -1,5 +1,5 @@
 # 🏥 HealthProcessAI
-
+[Check the website]( https://ki-smile.github.io/healthprocessai/website/
 ## Process Mining Framework for Healthcare & Life Sciences
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
